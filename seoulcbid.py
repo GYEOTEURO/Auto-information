@@ -3,68 +3,100 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-import datetime
-from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
+import datetime
+import re
 
-# Create a WebDriver instance
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+def find_post_links():
+    s = Service('./chromedriver')
+    driver = webdriver.Chrome(service=s)
 
-# Define the target URL
-url = "https://seoulcbid.or.kr/bbs/board.php?bo_table=0702"
-driver.get(url)
+    url = "https://seoulcbid.or.kr/bbs/board.php?bo_table=0702"
+    driver.get(url)
 
-# Find all the rows within the tbody element
-rows = driver.find_elements(By.XPATH, '//tbody/tr')
+    # Find all the rows within the tbody element
+    rows = driver.find_elements(By.XPATH, '//tbody/tr')
 
-# Get the current date
-current_date = datetime.date.today()
+    # Get the current date
+    current_date = datetime.date.today()
 
-# Collect the post data
-for row in rows:
+    # Collect the post links with dates
+    post_links = []
+
+    # Collect the post data
+    for row in rows:
+        try:
+            # Find the span element containing the date
+            date_element = row.find_element(By.XPATH, './/td[@class="td_date hidden-xs text-left"]')
+            date_string = date_element.text
+
+            # Extract the date from the string
+            post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d')
+
+            # Calculate the date difference in days
+            date_diff = (current_date - post_date.date()).days
+
+            # Check if the post is within the last month
+            if date_diff <= 30:
+                # Find the link to the post within the row
+                link_element = row.find_element(By.XPATH, './/a[contains(@href, "wr_id=")]')
+                link = link_element.get_attribute('href')
+
+                # Extract the wr_id from the link using regular expressions
+                wr_id_match = re.search(r'wr_id=(\d+)', link)
+                if wr_id_match:
+                    wr_id = wr_id_match.group(1)
+                    post_links.append((wr_id, link, post_date))
+
+        except Exception as e:
+            print(f"날짜 처리 중 오류 발생: {e}")
+
+    driver.quit()
+
+    return post_links
+
+# Example usage
+post_links = find_post_links()
+
+# Set up the Chrome driver
+s = Service('./chromedriver')
+driver = webdriver.Chrome(service=s)
+
+# Iterate over the post links and extract the data for the posts within the last month
+for wr_id, link, post_date in post_links:
     try:
-        # Extract the post date from the internal page
-        date_element = row.find_element(By.CSS_SELECTOR, 'span[title="작성일"]')
-        date_string = date_element.text
-        post_date = datetime.datetime.strptime(date_string.split()[1].strip(), '%y-%m-%d').date()
+        # Navigate to the link
+        driver.get(link)
+        print(link)
 
-        # Calculate the date difference in days
-        date_diff = (current_date - post_date).days
+        # Wait for the page to load
+        time.sleep(3)
 
-        # Check if the post is within the last month
-        if date_diff <= 30:
-            # Extract the link to the post
-            link_element = row.find_element(By.TAG_NAME, 'a')
-            post_link = link_element.get_attribute('href')
+        # Extract the HTML content of the post
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
 
-            # Navigate to the post page
-            driver.get(post_link)
+        # Extract the title
+        title_element = soup.select_one('h6.pull-left')
+        title = title_element.text.strip() if title_element else None
+        print(f"Title: {title}")
 
-            # Extract the content of the post
-            content_element = driver.find_element(By.ID, 'bo_v_con')
-            content_html = content_element.get_attribute('outerHTML')
-            content_soup = BeautifulSoup(content_html, 'html.parser')
-            content = content_soup.get_text(strip=True)
+        # Extract the content
+        content_element = soup.select_one('#bo_v_con')
+        content = content_element.text.strip() if content_element else None
+        print(f"Content: {content}")
 
-            # Extract the title of the post
-            title_element = content_soup.find('strong')
-            title = title_element.get_text(strip=True)
+        # Extract the images
+        image_elements = soup.select('#bo_v_con img')
+        image_urls = [img['src'] for img in image_elements]
+        print("Images:")
+        for img_url in image_urls:
+            print(img_url)
 
-            # Extract the image URL if it exists
-            image_element = content_soup.find('figure', class_='image')
-            image_url = image_element.find('img')['src'] if image_element else None
-
-            # Print the extracted data
-            print(f"제목: {title}")
-            print(f"내용: {content}")
-            print(f"이미지 URL: {image_url}")
-            print("--------------------")
+        print(f"Date: {post_date}")
 
     except Exception as e:
-        print(f"링크 처리 중 오류 발생: {e}")
+        print(f"Error in post with wr_id {wr_id}: {e}")
 
-    # Wait for a moment before processing the next link
-    time.sleep(1)
-
-# Close the WebDriver
+# Quit the driver after processing all post links
 driver.quit()
