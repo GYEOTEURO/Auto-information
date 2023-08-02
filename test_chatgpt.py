@@ -1,11 +1,13 @@
 import pandas as pd
 import openai
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Setting
-openai.organization = os.environ['OPENAI_API_KEY']
-openai.api_key = os.environ['OPENAI_ORGANIZAION_ID']
+openai.organization = os.getenv('OPENAI_ORGANIZAION_ID')
+openai.api_key = os.getenv('OPENAI_API_KEY') 
 
 
 def get_openai_response(prompt, print_output=False):
@@ -58,4 +60,4 @@ for ind, row in df.iterrows():
 
 df_result = pd.DataFrame(result_list)
 
-df_result.to_csv('summary.csv', mode='a', index=False, encoding='utf-8-sig')
+df_result.to_csv('result/summary.csv', mode='a', index=False, encoding='utf-8-sig')
