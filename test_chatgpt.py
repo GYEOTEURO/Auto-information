@@ -60,4 +60,4 @@ for ind, row in df.iterrows():
 
 df_result = pd.DataFrame(result_list)
 
-df_result.to_csv('result/summary.csv', mode='a', index=False, encoding='utf-8-sig')
+df_result.to_csv('result/summary.csv', mode='a', header=False, encoding='utf-8-sig')
