@@ -22,7 +22,7 @@ except Exception as e:
 
 # Make result csv file to apply column format
 try:
-    df.to_csv('/result/seoul_edu.csv', mode='w')
+    df.to_csv('result/seoul_edu.csv', mode='w')
 except Exception as e:
     print(e, ': Apply format to seoul_edu.csv') 
 
@@ -61,7 +61,11 @@ def getOutsideDate(thread):
 
 def makeContentLinkGroup():
     while isRemaiedPaegs():
-        threads = driver.find_elements(By.CSS_SELECTOR, "#container > section.cinner > div > div.bd-list > table > tbody > tr")
+        try:
+            threads = driver.find_elements(By.CSS_SELECTOR, "#container > section.cinner > div > div.bd-list > table > tbody > tr")
+        except Exception as e:
+            print(e, ": 게시글 리스트 크롤링 실패")
+            threads = []
 
         contentLinks = []
         for thread in threads:
@@ -73,31 +77,52 @@ def makeContentLinkGroup():
                 print(f"{date} : {contentLink}")
                 contentLinks.append(contentLink)
         movetoNextPage()
-        return contentLinks
+
+    return contentLinks
 
 def getRegion():
-    pass
+    return "서울시"
 
 def getCategory():
-    pass
+    return None
 
 def GetDisabilityType():
-    pass
+    return "전체"
 
 def getTitle():
-    pass
+    try:
+        title = driver.find_element(By.CLASS_NAME, "vtitle").find_element(By.CLASS_NAME, "tit").text
+    except Exception as e:
+        print(e, ": title 크롤링 실패")
+        title = ""
 
+    return title
+    
 def getInsideDate():
-    pass
+    try:
+        date = driver.find_element(By.CLASS_NAME, "vinfo").find_elements(By.TAG_NAME, "li")[1].text.split("\n")[1]
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+    except Exception as e:
+        print(e, "insideDate 크롤링 실패")
+        date = latestCrawlDate
+
+    return date
 
 def getContent():
-    pass
+    try:
+        content = driver.find_element(By.CLASS_NAME, "bd-view__vcontent").find_element(By.CLASS_NAME, "txt").text
+    except Exception as e:
+        print(e, ": content 크롤링 실패")
+        content = ""
+
+    return content
+
 
 def getOriginalLink():
     pass
 
 def getImage():
-    pass
+    return None
 
 # Get total contents length
 contentsLength = int(driver.find_element(By.CSS_SELECTOR, "#dataForm > div > div.bd-info > div.total > strong").text)
@@ -111,9 +136,10 @@ contentLinks = makeContentLinkGroup()
 print(contentLinks)
 
 # 게시글 하나씩 돌면서 크롤링 진행
+sites = []
 regions = []
 categories = []
-disability_types = []
+disabilityTypes = []
 titles = []
 dates = []
 contents = []
@@ -122,30 +148,31 @@ images = []
 
 for link in contentLinks:
     moveToEachContent(link)
+    sites.append('서울시교육청 특수교육과')
     regions.append(getRegion())
     categories.append(getCategory())
-    disability_types.append(GetDisabilityType())
+    disabilityTypes.append(GetDisabilityType())
     titles.append(getTitle())
     dates.append(getInsideDate())
     contents.append(getContent())
-    original_links.append(getOriginalLink())
+    # original_links.append(getOriginalLink())
     images.append(getImage())
 
-df['site'] = '서울시교육청 특수교육과'
+df['site'] = sites
 df['region'] = regions
 df['category'] = categories
-df['disability_type'] = disability_types
+df['disability_type'] = disabilityTypes
 df['title'] = titles
 df['date'] = dates
 df['content'] = contents
-df['original_link'] = original_links
-df['conten_links'] = contentLinks
-df['image'] = images
+df['original_link'] = contentLinks # 따로 외부 링크 없기에 본문 링크 동일
+df['content_link'] = contentLinks
+df['image'] = images # 따로 이미지가 안올라옴
 
 
 # Save dataframe to csv file
 try:
-    df.to_csv('/result/seoul_edu.csv', mode='a', header=False)
+    df.to_csv('result/seoul_edu.csv', mode='a', header=False)
 except Exception as e:
     print(e, ": Make crawling result csv file")
 
