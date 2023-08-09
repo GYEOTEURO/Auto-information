@@ -143,7 +143,7 @@ disabilityTypes = []
 titles = []
 dates = []
 contents = []
-original_links = []
+originalLinks = []
 images = []
 
 for link in contentLinks:
@@ -155,7 +155,7 @@ for link in contentLinks:
     titles.append(getTitle())
     dates.append(getInsideDate())
     contents.append(getContent())
-    # original_links.append(getOriginalLink())
+    # originalLinks.append(getOriginalLink())
     images.append(getImage())
 
 df['site'] = sites
