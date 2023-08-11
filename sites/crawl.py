@@ -9,7 +9,7 @@ import pandas as pd
 import os
 
 
-class Crawl():
+class Crawl:
     sites = []
     regions = []
     categories = []
