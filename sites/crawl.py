@@ -146,7 +146,6 @@ class Crawl:
 
         return content
 
-
     def getOriginalLink(self):
         pass
 
@@ -189,5 +188,3 @@ class Crawl:
         self.makeCSVwithFormat()
         self.makeCrawlingResultToDataframe()
         self.saveDataframeToCSV()
-
-
