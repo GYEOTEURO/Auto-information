@@ -80,7 +80,7 @@ class Crawl:
         href = thread.find_element(By.TAG_NAME, "a").get_attribute('href')
         return href
 
-    def getOutsideDate(thread):
+    def getOutsideDate(self, thread):
         date = thread.find_element(By.CLASS_NAME, "bbs_date").text
         date = datetime.strptime(date, '%Y-%m-%d')
         return date
@@ -95,6 +95,9 @@ class Crawl:
             except Exception as e:
                 print(e, ": 게시글 리스트 크롤링 실패")
                 threads = []
+            print(threads)
+            
+            print("-------------")
 
             self.contentLinks = []
             for thread in threads:
