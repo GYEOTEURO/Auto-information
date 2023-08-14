@@ -39,13 +39,13 @@ class Crawl:
     def makeCSVwithFormat(self):
         # Get data format
         try:
-            self.df = pd.read_csv('format.csv')
+            self.df = pd.read_csv('result/format.csv')
         except Exception as e:
             print(e, ': Load format.csv') 
 
         # Make result csv file to apply column format
         try:
-            self.df.to_csv(f'result/{self.fileName}.csv', mode='w')
+            self.df.to_csv(f'result/crawl/{self.fileName}.csv', mode='w')
         except Exception as e:
             print(e, f': Apply format to {self.fileName}.csv')
 
@@ -181,7 +181,7 @@ class Crawl:
 
     def saveDataframeToCSV(self):
         try:
-            self.df.to_csv(f'result/{self.fileName}.csv', mode='a', header=False)
+            self.df.to_csv(f'result/crawl/{self.fileName}.csv', mode='a', header=False)
         except Exception as e:
             print(e, ": Make crawling result csv file")
 
