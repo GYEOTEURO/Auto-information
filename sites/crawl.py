@@ -95,9 +95,6 @@ class Crawl:
             except Exception as e:
                 print(e, ": 게시글 리스트 크롤링 실패")
                 threads = []
-            print(threads)
-            
-            print("-------------")
 
             self.contentLinks = []
             for thread in threads:
