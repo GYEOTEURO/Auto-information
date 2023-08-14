@@ -1,0 +1,5 @@
+*.env
+*.key
+*.keys
+*.jks
+*.json
