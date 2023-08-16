@@ -56,7 +56,7 @@ for post in postList:
         else:
             continue
         
-        content = driver.find_element(By.CLASS_NAME, 'post-content')
+        content = driver.find_element(By.CLASS_NAME, 'post-content').text
         
         imgs = []
 
@@ -69,12 +69,12 @@ for post in postList:
             print('이미지 없음')
 
         sites.append('강남장애인복지관')
-        regions.append('서울시')
+        regions.append('서울시 강남구')
         categories.append(None)
         disabilityTypes.append(None)
         titles.append(title)
         dates.append(uploadDate)
-        contents.append(content.text)
+        contents.append(content)
         #originalLinks.append(link)-
         contentLinks.append(linkText)
         images.append(imgs)
