@@ -51,8 +51,9 @@ for ind, row in df.iterrows():
     '''
 
     # scipt가 짧을 경우
-    request = "뒤에 오는 문장을 5줄로 요약해줘./n" + script + "BYOURSIDE_DONE"
-    response = get_openai_response(request)
+    request = "위 내용을 5줄로 요약해줘. 그리고 주제가 (교육, 보조기기, 지원금, 돌봄 서비스) 중 어디에 가장 적합한 지 알려줘. \
+            또한 장애 유형은 (발달 장애, 뇌병변 장애) 중 어디에 가장 적합한 지 알려줘. /n" + script + "BYOURSIDE_DONE"
+    response = get_openai_response(request, True)
     summary_result = response
 
 

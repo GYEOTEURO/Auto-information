@@ -110,3 +110,13 @@ class Summarizer:
             self.disablityTypes.append(disablityType)
 
         self.makeSummaryResultToDataframe()
+
+
+class chatGPT(Summarizer):
+
+    def __init__(self, gptName) -> None:
+        super().__init__("chatGPT")
+
+    def makeInstanceOfGPT(self, gptName):
+        openai.organization = os.getenv('OPENAI_ORGANIZAION_ID')
+        openai.api_key = os.getenv('OPENAI_API_KEY') 
