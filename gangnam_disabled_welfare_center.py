@@ -7,16 +7,26 @@ from datetime import date, timedelta, datetime
 import os
 from urllib.request import urlretrieve
 import csv
+import pandas as pd
 
-#path_folder = '/home/shinmg/2022barrier-free/image/'
+path_folder = '/home/shinmg/2022barrier-free/autoInformation/Auto-information/result/'
 
+sites = []
+regions = []
+categories = []
+disabilityTypes = []
+titles = []
+dates = []
+contents = []
+contentLinks = []
+images = []
 
 today = date.today()
 one_week = timedelta(weeks=1)
 last_week = today - one_week*20
 
 def strToDate(strDate):
-    dateTime = datetime.strptime(uploadDate, '%Y-%m-%d')
+    dateTime = datetime.strptime(strDate, '%Y-%m-%d')
     return datetime.date(dateTime)
 
 
@@ -38,6 +48,7 @@ for post in postList:
     if strToDate(uploadDate) > last_week:
         link = post.find_element(By.TAG_NAME, 'a')
         title = link.text
+        linkText = link.get_attribute('href')
 
         if '[모집]' in title or '[참여]' in title:
             link.click()
@@ -47,33 +58,42 @@ for post in postList:
         
         content = driver.find_element(By.CLASS_NAME, 'post-content')
         
-        images = []
+        imgs = []
 
         try:
             imgList = content.find_elements(By.TAG_NAME, 'img')
             for idx, img in enumerate(imgList):
                 imgLink = img.get_attribute('src')
-                extensionType = imgLink.split('.')[-1]
-                #urlretrieve(imgLink, f'{path_folder}{title}_{idx}.{extensionType}')
-                images.append(imgLink)
+                imgs.append(imgLink)
         except:
             print('이미지 없음')
-        
-        data = [
-            {'title':title},
-            {'content':content},
-            {'content_link':link.get_attribute('href')},
-            {'image':images},
-            {'region':'서울시 강남구'},
-            {'date':uploadDate},
-            {'site':'강남장애인복지관'},
-        ]
 
-        f = open("gangnam_disabled_welfare_center.csv", "w")
-        writer = csv.writer(f)
-        writer.writerows(data)
-        f.close()
-        
+        sites.append('강남장애인복지관')
+        regions.append('서울시')
+        categories.append(None)
+        disabilityTypes.append(None)
+        titles.append(title)
+        dates.append(uploadDate)
+        contents.append(content.text)
+        #originalLinks.append(link)-
+        contentLinks.append(linkText)
+        images.append(imgs)
+
         driver.back()
 
+df = pd.read_csv(f'{path_folder}format.csv', encoding='utf-8')
+df.to_csv(f'{path_folder}crawl/gangnam_disabled_welfare_center.csv', mode='w', encoding='utf-8')
 
+df['site'] = sites
+df['region'] = regions
+df['category'] = categories
+df['disability_type'] = disabilityTypes
+df['title'] = titles
+df['date'] = dates
+df['content'] = contents
+df['original_link'] = contentLinks
+df['content_link'] = contentLinks
+df['image'] = images
+    
+
+df.to_csv(f'{path_folder}crawl/gangnam_disabled_welfare_center.csv', mode='a', header=False, encoding='utf-8')
