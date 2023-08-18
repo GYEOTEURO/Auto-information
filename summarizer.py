@@ -1,9 +1,16 @@
-from bardapi import Bard
+from bardapi import Bard, BardCookies
+from bardapi.constants import SESSION_HEADERS
 import openai
 import os
 from dotenv import load_dotenv
 import requests
 import pandas as pd
+import json
+import yaml
+
+# Summarize에 쓸 constants load
+with open('constants.yaml', encoding='UTF-8') as f:
+    constants = yaml.load(f, Loader=yaml.FullLoader)
 
 '''
 # session 을 유지하고 싶을 경우
@@ -18,7 +25,6 @@ session.headers = {
         }
 session.cookies.set("__Secure-1PSID", os.getenv("BARD_COOKIE_KEY"))
 '''
-
 
 class Summarizer:
     fileName = ''
@@ -42,7 +48,12 @@ class Summarizer:
 
     def makeInstanceOfGPT(self, gptName):
         if gptName == "Bard":
-            self.gpt = Bard(token=self.token, timeout=30)
+            session = requests.Session()
+            session.headers = SESSION_HEADERS
+            session.cookies.set("__Secure-1PSID", self.token)
+            session.cookies.set("__Secure-1PSIDTS", os.getenv("BARD_COOKIE_1PSIDTS"))
+            session.cookies.set("__Secure-1PSIDCC", os.getenv("BARD_COOKIE_1PSIDCC"))
+            self.gpt = Bard(token=self.token, timeout=30, session=session)
 
     def loadDataframe(self):
         try:
@@ -79,15 +90,21 @@ class Summarizer:
         return defaultCategory
                 
     def getSummaryAndCategoryAndDisabilityType(self, content):
-        prompt = content + "\n" + "위 내용을 5줄로 요약해줘. 그리고 주제가 (교육, 보조기기, 지원금, 돌봄 서비스) 중 어디에 가장 적합한 지 알려줘. \
-            또한 장애 유형은 (발달 장애, 뇌병변 장애) 중 어디에 가장 적합한 지 알려줘"
-        response = self.gpt.get_answer(prompt)['content']
-        print(response)
+        prompt = content + constants['prompt']['summary']
+        summary = self.gpt.get_answer(prompt)['content']
+        print(summary)
         print("---------------------------")
 
-        summary, category, disablityType = map(str, response.split(sep = "\n\n", maxsplit=2))
-        disablityType = self.detectDisablityType(disablityType)
-        category = self.detectCategory(category)
+        prompt = summary + constants['prompt']['detect']
+        response_json = self.gpt.get_answer(prompt)['content']
+        print(response_json)
+        response_json = response_json.replace("\"", "'")
+        try:
+            response_json = json.loads(response_json)
+        except json.decoder.JSONDecodeError as e:
+            print("JSON Decode Error : retry generate quiz")
+        disablityType = response_json['disability_type']
+        category = response_json['category']
 
         print(f"장애 유형: {disablityType}, 카테고리: {category}\n 요약문:\n{summary}")
         print("============================")
@@ -120,3 +137,10 @@ class chatGPT(Summarizer):
     def makeInstanceOfGPT(self, gptName):
         openai.organization = os.getenv('OPENAI_ORGANIZAION_ID')
         openai.api_key = os.getenv('OPENAI_API_KEY') 
+
+
+
+if __name__ == "__main__":
+    b = Summarizer("Bard")
+    b.setFileName("seoul_edu")
+    b.summarizeContents()
