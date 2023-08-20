@@ -4,12 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from datetime import date, timedelta, datetime
-import os
-from urllib.request import urlretrieve
-import csv
-import pandas as pd
-
-path_folder = '/home/shinmg/2022barrier-free/autoInformation/Auto-information/result/'
+from save_csv import saveCsv
 
 sites = []
 regions = []
@@ -56,12 +51,12 @@ for post in postList:
         else:
             continue
         
-        content = driver.find_element(By.CLASS_NAME, 'post-content').text
-        
+        body = driver.find_element(By.CLASS_NAME, 'post-content')
+        content = body.text 
         imgs = []
 
         try:
-            imgList = content.find_elements(By.TAG_NAME, 'img')
+            imgList = body.find_elements(By.TAG_NAME, 'img')
             for idx, img in enumerate(imgList):
                 imgLink = img.get_attribute('src')
                 imgs.append(imgLink)
@@ -69,7 +64,7 @@ for post in postList:
             print('이미지 없음')
 
         sites.append('강남장애인복지관')
-        regions.append('서울시 강남구')
+        regions.append(['서울시', '강남구'])
         categories.append(None)
         disabilityTypes.append(None)
         titles.append(title)
@@ -81,19 +76,4 @@ for post in postList:
 
         driver.back()
 
-df = pd.read_csv(f'{path_folder}format.csv', encoding='utf-8')
-df.to_csv(f'{path_folder}crawl/gangnam_disabled_welfare_center.csv', mode='w', encoding='utf-8')
-
-df['site'] = sites
-df['region'] = regions
-df['category'] = categories
-df['disability_type'] = disabilityTypes
-df['title'] = titles
-df['date'] = dates
-df['content'] = contents
-df['original_link'] = contentLinks
-df['content_link'] = contentLinks
-df['image'] = images
-    
-
-df.to_csv(f'{path_folder}crawl/gangnam_disabled_welfare_center.csv', mode='a', header=False, encoding='utf-8')
+saveCsv('gangnam_disabled_welfare_center', sites, regions, categories, disabilityTypes, titles, dates, contents, contentLinks, images)
