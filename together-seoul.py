@@ -8,11 +8,11 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
-fileName = 'jgcrc'
-siteName = '서울특별시중구장애인복지관'
-region = ['서울시','중구']
+fileName = 'together-seoul'
+siteName = '서울시장애인복지관협회'
+region = ['서울시']
 category = None
-disabilityType = '전체'
+disabilityType = '뇌병변'
 
 sites = []
 regions = []
@@ -45,10 +45,10 @@ print(str(before_one_month))
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
 
-url = "https://www.jgcrc.or.kr/notice"
+url = "http://www.together-seoul.org/menu/?menu_str=0406"
 driver.get(url)
 # Find all the rows within the tbody element
-rows = driver.find_elements(By.XPATH, '//tbody/tr')
+rows = driver.find_elements(By.TAG_NAME, 'tr')
 
 # Get the current date
 current_date = datetime.date.today()
@@ -57,22 +57,22 @@ current_date = datetime.date.today()
 post_links = []
 for row in rows:
     try:
-        # 포스트의 날짜 정보 추출
-        date_string = row.find_element(By.CLASS_NAME, 'date').text
-        post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()
+        columns = row.find_elements(By.TAG_NAME, 'td')
 
-        # 날짜 차이 계산 (오늘과 포스트 작성일과의 차이)
-        date_diff = (current_date - post_date).days
+        if len(columns) >= 5:
+            date_string = columns[3].text
+            post_date = datetime.datetime.strptime(date_string, '%y-%m-%d').date()
 
-        # 포스트가 30일 이내에 작성된 것인지 확인
-        if date_diff <= 30:
-            # 30일 이내에 작성된 포스트의 경우 링크를 수집
-            link_element = row.find_element(By.TAG_NAME, 'a')
-            link = link_element.get_attribute('href')
-            post_links.append(link)
+            # Calculate date difference
+            date_diff = (current_date - post_date).days
+
+            if date_diff <= 30:
+                link_element = columns[1].find_element(By.TAG_NAME, 'a')
+                link = link_element.get_attribute('href')
+                post_links.append(link)
 
     except Exception as e:
-        print(f"날짜 처리 중 오류 발생: {e}")
+        print(f"Error processing date: {e}")
 
 # Iterate over the post links and extract the data for the posts within the last month
 for link in post_links:
@@ -80,34 +80,40 @@ for link in post_links:
         # Navigate to the link
         driver.get(link)
 
-        # Extract the content and other optional elements from the internal page
+        # Extract the title, author, date, and content from the internal page
         try:
-            title = driver.find_element(By.CLASS_NAME, 'title_view').text
+            title_element = driver.find_element(By.XPATH, "//dl[@class='top_title']/dd")
+            title = title_element.text
         except Exception as e:
-            print(e, ": title 크롤링 실패")
+            print(e, ": title crawling failed")
             title = ""
-        
+
         try:
-            author_date = driver.find_element(By.CLASS_NAME, 'view_info').text
-            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD 형식의 패턴
-            author_date = re.search(date_pattern, author_date).group()
+            author_date_element = driver.find_elements(By.XPATH, "//dl[contains(dt/span, '작성자') or contains(dt/span, '등록일')]/dd")
+            author = author_date_element[0].text
+            date_string = author_date_element[1].text
+            date_pattern = r"\d{2}-\d{2}-\d{2}"  # YY-MM-DD format pattern
+            extracted_date = re.search(date_pattern, date_string).group()
         except Exception as e:
-            print(e, "authorDate 크롤링 실패")
-            author_date = current_date
-        
+            print(e, "author or date crawling failed")
+            author = ""
+            extracted_date = ""
+
         try:
-            content = driver.find_element(By.CLASS_NAME, 'view_detail').text
+            content_element = driver.find_element(By.CLASS_NAME, 'detail_data')
+            content = content_element.text
         except Exception as e:
-            print(e, "content 크롤링 실패")
+            print(e, "content crawling failed")
             content = ""
 
         # Extract the image URL if it exists
         try:
-            image_element = driver.find_element(By.CLASS_NAME, 'view_image')
+            image_element = driver.find_element(By.XPATH, "//a[@class='view_image']")
             image_url = image_element.get_attribute('href')
         except Exception as e:
-            print(e, "image 크롤링 실패")
+            print(e, "image crawling failed")
             image_url = None
+
 
 
         sites.append(siteName)
@@ -115,7 +121,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(author_date)
+        dates.append(extracted_date)
         contents.append(content)
         images.append(image_url)
 
