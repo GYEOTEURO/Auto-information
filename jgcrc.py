@@ -5,7 +5,38 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 import datetime
 from dateutil.relativedelta import relativedelta
+import pandas as pd
+import re
 
+fileName = 'jgcrc'
+siteName = '서울특별시중구장애인복지관'
+region = ['서울시','중구']
+category = None
+disabilityType = '전체'
+
+sites = []
+regions = []
+categories = []
+disabilityTypes = []
+titles = []
+dates = []
+contents = []
+originalLinks = []
+images = []
+
+
+try:
+    df = pd.read_csv('result/format.csv')
+except Exception as e:
+    print(e, ': Load format.csv') 
+
+# Make result csv file to apply column format
+try:
+    df.to_csv(f'result/crawl/{fileName}.csv', mode='w')
+except Exception as e:
+    print(e, f': Apply format to {fileName}.csv')
+
+            
 now_date = datetime.datetime.now()
 before_one_month = now_date + relativedelta(months=-1)
 
@@ -50,37 +81,63 @@ for link in post_links:
         driver.get(link)
 
         # Extract the content and other optional elements from the internal page
-        title = driver.find_element(By.CLASS_NAME, 'title_view').text
-        author_date = driver.find_element(By.CLASS_NAME, 'view_info').text
-        content = driver.find_element(By.CLASS_NAME, 'view_detail').text
+        try:
+            title = driver.find_element(By.CLASS_NAME, 'title_view').text
+        except Exception as e:
+            print(e, ": title 크롤링 실패")
+            title = ""
+        
+        try:
+            author_date = driver.find_element(By.CLASS_NAME, 'view_info').text
+            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD 형식의 패턴
+            author_date = re.search(date_pattern, author_date).group()
+        except Exception as e:
+            print(e, "authorDate 크롤링 실패")
+            author_date = current_date
+        
+        try:
+            content = driver.find_element(By.CLASS_NAME, 'view_detail').text
+        except Exception as e:
+            print(e, "content 크롤링 실패")
+            content = ""
 
         # Extract the image URL if it exists
         try:
             image_element = driver.find_element(By.CLASS_NAME, 'view_image')
             image_url = image_element.get_attribute('href')
-        except :
+        except Exception as e:
+            print(e, "image 크롤링 실패")
             image_url = None
 
-        # Extract other optional elements if they exist
-        try:
-            attachment_element = driver.find_element(By.CSS_SELECTOR, 'ul.ul_view_01 li em')
-            attachment_name = attachment_element.text
-            attachment_link = attachment_element.find_element(By.XPATH, './following-sibling::span/a').get_attribute('href')
-        except :
-            attachment_name = None
-            attachment_link = None
 
-        # Print the extracted data
-        print(f"제목: {title}")
-        print(f"작성자 및 날짜: {author_date}")
-        print(f"내용: {content}")
-        print(f"이미지 URL: {image_url}")
-        print(f"첨부 파일: {attachment_name}")
-        print(f"첨부 파일 링크: {attachment_link}")
-        print("--------------------")
+        sites.append(siteName)
+        regions.append(region)
+        categories.append(category)
+        disabilityTypes.append(disabilityType)
+        titles.append(title)
+        dates.append(author_date)
+        contents.append(content)
+        images.append(image_url)
+
 
     except Exception as e:
         print(f"링크 처리 중 오류 발생: {e}")
 
     # Wait for a moment before processing the next link
     time.sleep(1)
+
+df['site'] = sites
+df['region'] = regions
+df['category'] = categories
+df['disability_type'] = disabilityTypes
+df['title'] = titles
+df['date'] = dates
+df['content'] = contents
+df['original_link'] = post_links
+df['content_link'] = post_links
+df['image'] = images
+
+try:
+    df.to_csv(f'result/crawl/{fileName}.csv', mode='a', header=False)
+except Exception as e:
+    print(e, ": Make crawling result csv file")
