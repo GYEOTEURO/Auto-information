@@ -1,14 +1,11 @@
-# 강북장애인종합복지관
+# 노원구장애인가족지원센터
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from datetime import date, timedelta, datetime
-import os
-from urllib.request import urlretrieve
-import pandas as pd
 
-path_folder = '/home/shinmg/2022barrier-free/autoInformation/Auto-information/result/'
+from save_csv import saveCsv
 
 sites = []
 regions = []
@@ -22,7 +19,7 @@ images = []
 
 today = date.today()
 one_week = timedelta(weeks=1)
-last_week = today - one_week*20
+last_week = today - one_week*5
 
 def strToDate(strDate):
     strDate = strDate.replace('.', '-')
@@ -66,8 +63,8 @@ for post in postList:
         except:
             print('이미지 없음')
 
-        sites.append('강남장애인복지관')
-        regions.append('서울시 강남구')
+        sites.append('노원구장애인가족지원센터')
+        regions.append(['서울시', '노원구'])
         categories.append(None)
         disabilityTypes.append(None)
         titles.append(title)
@@ -81,20 +78,4 @@ for post in postList:
     else:
         break
 
-
-df = pd.read_csv(f'{path_folder}format.csv', encoding='utf-8')
-df.to_csv(f'{path_folder}crawl/nowon_family_support_center.csv', mode='w', encoding='utf-8')
-
-df['site'] = sites
-df['region'] = regions
-df['category'] = categories
-df['disability_type'] = disabilityTypes
-df['title'] = titles
-df['date'] = dates
-df['content'] = contents
-df['original_link'] = contentLinks
-df['content_link'] = contentLinks
-df['image'] = images
-    
-
-df.to_csv(f'{path_folder}crawl/nowon_family_support_center.csv', mode='a', header=False, encoding='utf-8')
+saveCsv('nowon_family_support_center', sites, regions, categories, disabilityTypes, titles, dates, contents, contentLinks, images)
