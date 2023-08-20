@@ -4,10 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from datetime import date, timedelta, datetime
-import os
-import pandas as pd
-
-path_folder = '/home/shinmg/2022barrier-free/autoInformation/Auto-information/result/'
+from save_csv import saveCsv
 
 sites = []
 regions = []
@@ -41,7 +38,6 @@ postList = driver.find_element(By.CLASS_NAME, 'gallery_list').find_elements(By.C
 
 for post in postList:
     uploadDate = post.find_element(By.CLASS_NAME, 'g_day').text
-    print('*********', uploadDate)
 
     if strToDate(uploadDate.split('\n')[0]) > last_week:
         link = post.find_element(By.TAG_NAME, 'a')
@@ -64,7 +60,7 @@ for post in postList:
             print('이미지 없음')
 
         sites.append('강북장애인종합복지관')
-        regions.append('서울시 강북구')
+        regions.append(['서울시', '강북구'])
         categories.append(None)
         disabilityTypes.append(None)
         titles.append(title)
@@ -76,20 +72,4 @@ for post in postList:
         
         driver.back()
 
-
-df = pd.read_csv(f'{path_folder}format.csv', encoding='utf-8')
-df.to_csv(f'{path_folder}crawl/gangbuk_disabled_welfare_center.csv', mode='w', encoding='utf-8')
-
-df['site'] = sites
-df['region'] = regions
-df['category'] = categories
-df['disability_type'] = disabilityTypes
-df['title'] = titles
-df['date'] = dates
-df['content'] = contents
-df['original_link'] = contentLinks
-df['content_link'] = contentLinks
-df['image'] = images
-    
-
-df.to_csv(f'{path_folder}crawl/gangbuk_disabled_welfare_center.csv', mode='a', header=False, encoding='utf-8')
+saveCsv('gangbuk_disabled_welfare_center', sites, regions, categories, disabilityTypes, titles, dates, contents, contentLinks, images)
