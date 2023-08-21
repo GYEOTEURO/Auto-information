@@ -30,7 +30,6 @@ try:
 except Exception as e:
     print(e, ': Load format.csv') 
 
-# Make result csv file to apply column format
 try:
     df.to_csv(f'result/crawl/{fileName}.csv', mode='w')
 except Exception as e:
