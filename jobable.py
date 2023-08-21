@@ -76,8 +76,6 @@ for row in rows:
 
 # Iterate over the post links and extract the data for the posts within the last month
 for link in post_links:
-    image_urls = []
-
     try:
         driver.get(link)
 
@@ -101,11 +99,15 @@ for link in post_links:
 
         # 이미지 URL 추출
         try:
-            image_elements = driver.find_elements(By.XPATH, "//div[@class='view']/img")
-            image_urls = [element.get_attribute("src") for element in image_elements]
+            # 이미지가 보일 때까지 대기
+            img_element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//*[@id='content']/form/div/div[1]/table/tbody/tr[3]/td/p[3]/img"))
+            )
+            # 이미지 URL 추출
+            image_url = img_element.get_attribute("src")  
         except Exception as e:
             print(e, ": image URL crawling failed")
-            image_urls = []
+            image_url = ""
 
 
         # 글 내용 추출
@@ -124,7 +126,7 @@ for link in post_links:
         titles.append(title)
         dates.append(date)
         contents.append(content)
-        images.append(image_urls) 
+        images.append(image_url) 
         originalLinks.append(link)
 
     except Exception as e:
