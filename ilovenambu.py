@@ -89,8 +89,8 @@ for link in post_links:
             title = ""
 
         try:
-            date_element = driver.find_element(By.XPATH, "//section[@id='bo_v_info']//strong[contains(text(), '작성일')]")
-            date_string = date_element.text.split(" ")[1] + " " + date_element.text.split(" ")[2]
+            date_element = driver.find_element(By.XPATH, "//section[@id='bo_v_info']//span[contains(@class, 'sound_only') and contains(text(), '작성일')]")
+            date_string = date_element.find_element(By.XPATH, "./following-sibling::strong").text.split()[0]
         except Exception as e:
             print(e, "date crawling failed")
             date_string = ""
@@ -101,28 +101,29 @@ for link in post_links:
         except Exception as e:
             print(e, "content crawling failed")
             content = ""
-
-        # try:
-        #     image_element = driver.find_element(By.XPATH, "//div[@id='bo_v_img']//a[@class='view_image']")
-        #     image_url = image_element.get_attribute('href')
-        # except Exception as e:
-        #     print(e, "image crawling failed")
-        #     image_url = None
-
-        # try:
-        #     img_element = driver.find_element(By.CSS_SELECTOR, "#bo_v_con img")
-        #     image_url = img_element.get_attribute("src")
-        # except Exception as e:
-        #     print(e, "image crawling failed")
-        #     image_url = None
-
+            
         try:
-            img_elements = driver.find_elements(By.CSS_SELECTOR, "#bo_v_con img")
-            image_urls = [img.get_attribute("src") for img in img_elements if "newsletter" in img.get_attribute("src")]
-            print("Image URLs:", image_urls)
-        except Exception as e:
-            print(e, "image crawling failed")
             image_urls = []
+            
+            # If multiple images are inside <div id="bo_v_con">
+            img_elements = driver.find_elements(By.CSS_SELECTOR, "#bo_v_con img")
+            image_urls.extend([img.get_attribute("src") for img in img_elements if "newsletter" in img.get_attribute("src")])
+
+            # Try to find images inside <div id="bo_v_con">
+            img_elements = driver.find_elements(By.CSS_SELECTOR, "#bo_v_con img")
+            image_urls.extend([img.get_attribute("src") for img in img_elements if "data/editor" in img.get_attribute("src")])
+
+            # Try to find an image inside <div id="bo_v_img">
+            try:
+                image_element = driver.find_element(By.XPATH, "//div[@id='bo_v_img']//a[@class='view_image']")
+                image_url = image_element.find_element(By.TAG_NAME, "img").get_attribute('src')
+                image_urls.append(image_url)
+            except:
+                pass
+
+        except Exception as e:
+            print(e, "Image crawling failed")
+        
 
         # Append the extracted data to lists
         sites.append(siteName)
