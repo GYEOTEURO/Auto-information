@@ -8,11 +8,11 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
-fileName = 'together-seoul'
-siteName = '서울시장애인복지관협회'
-region = ['서울시']
+fileName = 'ilovenambu'
+siteName = '서울특별시립 남부장애인종합복지관'
+region = ['서울시', '남부']
 category = None
-disabilityType = '뇌병변'
+disabilityType = '전체'
 
 sites = []
 regions = []
@@ -30,6 +30,7 @@ try:
 except Exception as e:
     print(e, ': Load format.csv') 
 
+# Make result csv file to apply column format
 try:
     df.to_csv(f'result/crawl/{fileName}.csv', mode='w')
 except Exception as e:
@@ -44,7 +45,7 @@ print(str(before_one_month))
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
 
-url = "http://www.together-seoul.org/menu/?menu_str=0406"
+url = "https://ilovenambu.or.kr/bbs/board.php?bo_table=0102"
 driver.get(url)
 # Find all the rows within the tbody element
 rows = driver.find_elements(By.TAG_NAME, 'tr')
@@ -59,8 +60,8 @@ for row in rows:
         columns = row.find_elements(By.TAG_NAME, 'td')
 
         if len(columns) >= 5:
-            date_string = columns[3].text
-            post_date = datetime.datetime.strptime(date_string, '%y-%m-%d').date()
+            date_string = columns[3].text.strip()  # Remove whitespace
+            post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()  # Fixed date format
 
             # Calculate date difference
             date_diff = (current_date - post_date).days
@@ -81,49 +82,58 @@ for link in post_links:
 
         # Extract the title, author, date, and content from the internal page
         try:
-            title_element = driver.find_element(By.XPATH, "//dl[@class='top_title']/dd")
+            title_element = driver.find_element(By.XPATH, "//h2[@id='bo_v_title']")
             title = title_element.text
         except Exception as e:
             print(e, ": title crawling failed")
             title = ""
 
         try:
-            author_date_element = driver.find_elements(By.XPATH, "//dl[contains(dt/span, '작성자') or contains(dt/span, '등록일')]/dd")
-            author = author_date_element[0].text
-            date_string = author_date_element[1].text
-            date_pattern = r"\d{2}-\d{2}-\d{2}"  # YY-MM-DD format pattern
-            extracted_date = re.search(date_pattern, date_string).group()
+            date_element = driver.find_element(By.XPATH, "//section[@id='bo_v_info']//strong[contains(text(), '작성일')]")
+            date_string = date_element.text.split(" ")[1] + " " + date_element.text.split(" ")[2]
         except Exception as e:
-            print(e, "author or date crawling failed")
-            author = ""
-            extracted_date = ""
+            print(e, "date crawling failed")
+            date_string = ""
 
         try:
-            content_element = driver.find_element(By.CLASS_NAME, 'detail_data')
+            content_element = driver.find_element(By.XPATH, "//div[@id='bo_v_con']")
             content = content_element.text
         except Exception as e:
             print(e, "content crawling failed")
             content = ""
 
-        # Extract the image URL if it exists
+        # try:
+        #     image_element = driver.find_element(By.XPATH, "//div[@id='bo_v_img']//a[@class='view_image']")
+        #     image_url = image_element.get_attribute('href')
+        # except Exception as e:
+        #     print(e, "image crawling failed")
+        #     image_url = None
+
+        # try:
+        #     img_element = driver.find_element(By.CSS_SELECTOR, "#bo_v_con img")
+        #     image_url = img_element.get_attribute("src")
+        # except Exception as e:
+        #     print(e, "image crawling failed")
+        #     image_url = None
+
         try:
-            image_element = driver.find_element(By.XPATH, "//a[@class='view_image']")
-            image_url = image_element.get_attribute('href')
+            img_elements = driver.find_elements(By.CSS_SELECTOR, "#bo_v_con img")
+            image_urls = [img.get_attribute("src") for img in img_elements if "newsletter" in img.get_attribute("src")]
+            print("Image URLs:", image_urls)
         except Exception as e:
             print(e, "image crawling failed")
-            image_url = None
+            image_urls = []
 
-
-
+        # Append the extracted data to lists
         sites.append(siteName)
         regions.append(region)
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(extracted_date)
+        dates.append(date_string)
         contents.append(content)
-        images.append(image_url)
-
+        images.append(image_urls)
+        originalLinks.append(link)
 
     except Exception as e:
         print(f"링크 처리 중 오류 발생: {e}")
