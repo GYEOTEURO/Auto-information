@@ -8,9 +8,9 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
-fileName = 'ilovenambu'
-siteName = '서울특별시립 남부장애인종합복지관'
-region = ['서울시', '남부']
+fileName = 'jobable'
+siteName = '서울특별시 장애인일자리 통합지원센터'
+region = ['서울시']
 category = None
 disabilityType = '전체'
 
@@ -45,7 +45,7 @@ print(str(before_one_month))
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
 
-url = "https://ilovenambu.or.kr/bbs/board.php?bo_table=0102"
+url = "https://jobable.seoul.go.kr/jobable/custmr_cntr/ntce/WwwNotice.do?method=selectWwwNoticeList&chUseZe=D"
 driver.get(url)
 # Find all the rows within the tbody element
 rows = driver.find_elements(By.TAG_NAME, 'tr')
