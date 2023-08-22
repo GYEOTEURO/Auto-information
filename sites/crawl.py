@@ -33,7 +33,7 @@ class Crawl:
         self.url = url
 
     def openBrowser(self):
-        self.driver= webdriver.Chrome(service=Service(ChromeDriverManager(version=self.version).install()))
+        self.driver= webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         self.driver.get(self.url)
 
     def makeCSVwithFormat(self):
@@ -87,7 +87,6 @@ class Crawl:
         return date
 
     def makeContentLinkGroup(self) -> None:
-        self.openBrowser()
         self.getTotalContentsLength()
 
         while self.isRemaiedPaegs():
@@ -187,5 +186,6 @@ class Crawl:
 
     def startCrawl(self):
         self.makeCSVwithFormat()
+        self.openBrowser()
         self.makeCrawlingResultToDataframe()
         self.saveDataframeToCSV()
