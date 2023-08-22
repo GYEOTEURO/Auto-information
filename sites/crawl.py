@@ -119,7 +119,7 @@ class Crawl:
         return True
 
     def getRegion(self):
-        return "서울시"
+        return ["서울시"]
 
     def getCategory(self):
         return None
