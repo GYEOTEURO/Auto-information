@@ -1,22 +1,113 @@
 from crawl import Crawl
+from selenium.webdriver.common.by import By
+
 
 class NowonEoullim(Crawl):
-    urlDict = {'free': 41, 'notice' : 51, 'eoullimNews':55, 'houseNeWs':56}
+    urlDict = {'free': '41', 'notice' : '51', 'eoullimNews': '55', 'houseNeWs': '56'}
 
-    def __init__(self, url, latestCrawlDate='2023-06-01') -> None:
-        super().__init__("nowon_center", url, latestCrawlDate)
+    def __init__(self, url, latestCrawlDate='2023-01-01') -> None:
+        super().__init__("nowon_eoullim", url, latestCrawlDate)
 
 
-    def setUrlByBoard(self, boardName):
+    def setAndMoveUrlByBoardOf(self, boardName="notice"):
         self.url = "http://www.nowonilc.or.kr/bbs/board.php?bo_table=" + self.urlDict[boardName]
+        self.driver.get(self.url)
+
+    def movetoNextPage(self):
+        self.currentPage += 1
+        nextPageUrl = f"http://www.nowonilc.or.kr/bbs/board.php?bo_table=51&page={self.currentPage}"
+        self.driver.get(nextPageUrl)
 
     def makeContentLinkGroup(self) -> None:
-        return super().makeContentLinkGroup()
+        self.getTotalContentsLength()
+        self.contentLinks = []
+        # 일단 공지사항만 했는데 나중에는 urlDict.keys()로 여러 게시판 콘텐츠 다 가져올 예정 (기사 가져온 게시판도 있어서 일단 공지사항만 함)
+        self.setAndMoveUrlByBoardOf("notice")
+
+        while self.isRemaiedPaegs():
+            try:
+                threads = self.driver.find_elements(By.CSS_SELECTOR, "#fboardlist > div > table > tbody > tr")
+            except Exception as e:
+                print(e, ": 게시글 리스트 크롤링 실패")
+                threads = []
+
+            if self.currentPage == 1:
+                pinnedContentTreads = self.driver.find_elements(By.CLASS_NAME, "#bo_notice")
+                self.appendPinnedContentLinkOf(threads)
+                threads = threads[len(pinnedContentTreads):]
+
+            isContentLeftAfterLastCrawlDate = self.appendNormalContentLinkOf(threads)
+            if isContentLeftAfterLastCrawlDate:
+                self.movetoNextPage()
+            else:
+                break
+
+        return None
+    
+    def appendNormalContentLinkOf(self, threads):
+        return super().appendContentLinkOf(threads)
+    
+    def appendPinnedContentLinkOf(self, threads):
+        for thread in threads:
+            date = self.getOutsideDate(thread)
+            if date <= self.latestCrawlDate:
+                return False
+            else:
+                contentLink = self.getContentLink(thread)
+                print(f"{date} : {contentLink}")
+                self.contentLinks.append(contentLink)
+        return True
+    
+    def getOutsideDate(self, thread):
+        return super().getOutsideDate(thread)
 
     def getContentsLengthPerPage(self):
-        return 5
+        try:
+            threads = self.driver.find_elements(By.CSS_SELECTOR, "#fboardlist > div > table > tbody > tr")
+        except Exception as e:
+            print(e)
+            return 30
+        return len(threads)
+
+    def getTotalContentsLength(self):
+        contentsLengthPerPage = self.getContentsLengthPerPage()
+        self.contentsLength = int(self.driver.find_element(By.CSS_SELECTOR, "#bo_list_total > span").text.split(' ')[-1][:-1])
+        self.pageLength = self.contentsLength // contentsLengthPerPage
+        if self.contentsLength % contentsLengthPerPage:
+            self.pageLength += 1
+
+    def getSite(self):
+        return "노원장애인자립생활센터어울림"
+    
+    def getRegion(self):
+        return super().getRegion()
+    
+    def getCategory(self):
+        return super().getCategory()
+    
+    def getContent(self):
+        return super().getContent()
+    
+    def getContentLink(self, thread):
+        return super().getContentLink(thread)
+    
+    def getImage(self):
+        return super().getImage()
+    
+    def getInsideDate(self):
+        return super().getInsideDate()
+    
+    def getOriginalLink(self):
+        return super().getOriginalLink()
+    
+    def getTitle(self):
+        pass
+    
+    
+    def startCrawl(self):
+        return super().startCrawl()
     
 
 nowonNotices = NowonEoullim("http://www.nowonilc.or.kr")
-print(nowonNotices.makeCSVwithFormat())
+print(nowonNotices.startCrawl())
 
