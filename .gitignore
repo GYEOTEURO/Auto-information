@@ -3,3 +3,9 @@
 *.keys
 *.jks
 *.json
+*.DS_Store
+
+# GPT Directory
+Bard/
+Llama2/
+koGPT/
