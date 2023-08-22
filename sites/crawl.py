@@ -56,7 +56,9 @@ class Crawl:
     def getTotalContentsLength(self):
         contentsLengthPerPage = self.getContentsLengthPerPage()
         self.contentsLength = int(self.driver.find_element(By.CSS_SELECTOR, "#dataForm > div > div.bd-info > div.total > strong").text)
-        self.pageLength = self.contentsLength // contentsLengthPerPage + 1
+        self.pageLength = self.contentsLength // contentsLengthPerPage
+        if self.contentsLength % contentsLengthPerPage:
+            self.pageLength += 1
 
     def isRemaiedPaegs(self):
         if self.currentPage <= self.pageLength:
