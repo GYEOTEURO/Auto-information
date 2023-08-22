@@ -99,17 +99,25 @@ class Crawl:
                 print(e, ": 게시글 리스트 크롤링 실패")
                 threads = []
 
-            for thread in threads:
-                date = self.getOutsideDate(thread)
-                if date <= self.latestCrawlDate:
-                    return None
-                else:
-                    contentLink = self.getContentLink(thread)
-                    print(f"{date} : {contentLink}")
-                    self.contentLinks.append(contentLink)
-            self.movetoNextPage()
+            isContentLeftAfterLastCrawlDate = self.appendContentLinkOf(threads)
+            if isContentLeftAfterLastCrawlDate:
+                self.movetoNextPage()
+            else:
+                break
 
         return None
+    
+    def appendContentLinkOf(self, threads):
+        self.contentLinks = []
+        for thread in threads:
+            date = self.getOutsideDate(thread)
+            if date <= self.latestCrawlDate:
+                return False
+            else:
+                contentLink = self.getContentLink(thread)
+                print(f"{date} : {contentLink}")
+                self.contentLinks.append(contentLink)
+        return True
 
     def getRegion(self):
         return "서울시"
@@ -191,3 +199,4 @@ class Crawl:
         self.openBrowser()
         self.makeCrawlingResultToDataframe()
         self.saveDataframeToCSV()
+        print(self.fileName)
