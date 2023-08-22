@@ -1,7 +1,8 @@
 from crawl import Crawl
 from selenium.webdriver.common.by import By
 import time
-
+from datetime import datetime
+import pandas as pd
 
 class NowonEoullim(Crawl):
     urlDict = {'free': '41', 'notice' : '51', 'eoullimNews': '55', 'houseNeWs': '56'}
@@ -13,7 +14,7 @@ class NowonEoullim(Crawl):
     def setAndMoveUrlByBoardOf(self, boardName="notice"):
         self.url = "http://www.nowonilc.or.kr/bbs/board.php?bo_table=" + self.urlDict[boardName]
         self.driver.get(self.url)
-        time.sleep(5)
+        # time.sleep(5)
 
     def movetoNextPage(self):
         self.currentPage += 1
@@ -67,7 +68,13 @@ class NowonEoullim(Crawl):
         return True
     
     def getOutsideDate(self, thread):
-        return super().getOutsideDate(thread)
+        try:
+            date = thread.find_element(By.CLASS_NAME, "td_date").text
+            date = datetime.strptime(date, '%Y-%m-%d')
+        except Exception as e:
+            print(e, ": 바깥에 있는 게시글 날짜 가져오기 실패")
+        
+        return date
 
     def getContentsLengthPerPage(self):
         try:
@@ -95,34 +102,58 @@ class NowonEoullim(Crawl):
         return "노원장애인자립생활센터어울림"
     
     def getRegion(self):
-        return super().getRegion()
+        return ["서울시", "노원구"]
     
     def getCategory(self):
         return super().getCategory()
     
     def getContent(self):
-        return super().getContent()
-    
-    def getContentLink(self, thread):
-        return super().getContentLink(thread)
+        try:
+            content = self.driver.find_element(By.ID, "bo_v_con").text
+        except Exception as e:
+            print(e, ": content 크롤링 실패")
+            content = ""
+
+        print(f"content : \n{content}")
+
+        return content
     
     def getImage(self):
-        return super().getImage()
+        images = []
+        try:
+            threadsOfImage = self.driver.find_element(By.ID, "bo_v_img").find_elements(By.TAG_NAME, 'img')
+            print(threadsOfImage)
+            for image in threadsOfImage:
+                imgLink = image.get_attribute('src')
+                images.append(imgLink)
+        except Exception as e:
+            print(e, ": 이미지 가져오기 실패 혹은 없음")
+            images = []
+
+        return images
     
     def getInsideDate(self):
-        return super().getInsideDate()
-    
-    def getOriginalLink(self):
-        return super().getOriginalLink()
+        try:
+            date = self.driver.find_element(By.CSS_SELECTOR, "#bo_v_info > strong:nth-child(4)").text
+            date = datetime.strptime(date, '%y-%m-%d %H:%M')
+
+        except Exception as e:
+            print(e, ": 게시글 내 날짜 가져오기 실패")
+            date = datetime.now()
+
+        return date
     
     def getTitle(self):
-        pass
-    
-    
-    def startCrawl(self):
-        return super().startCrawl()
+        try:
+            title = self.driver.find_element(By.CSS_SELECTOR, "#bo_v_title").text
+
+        except Exception as e:
+            print(e, ": title 가져오기 실패")
+            title = ""
+
+        return title
     
 
 nowonNotices = NowonEoullim("http://www.nowonilc.or.kr")
 print(nowonNotices.startCrawl())
-
+print("크롤링 완료")
