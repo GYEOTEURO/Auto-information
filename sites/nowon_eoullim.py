@@ -1,5 +1,6 @@
 from crawl import Crawl
 from selenium.webdriver.common.by import By
+import time
 
 
 class NowonEoullim(Crawl):
@@ -12,6 +13,7 @@ class NowonEoullim(Crawl):
     def setAndMoveUrlByBoardOf(self, boardName="notice"):
         self.url = "http://www.nowonilc.or.kr/bbs/board.php?bo_table=" + self.urlDict[boardName]
         self.driver.get(self.url)
+        time.sleep(5)
 
     def movetoNextPage(self):
         self.currentPage += 1
@@ -19,10 +21,11 @@ class NowonEoullim(Crawl):
         self.driver.get(nextPageUrl)
 
     def makeContentLinkGroup(self) -> None:
+        self.setAndMoveUrlByBoardOf("notice")
+
         self.getTotalContentsLength()
         self.contentLinks = []
         # 일단 공지사항만 했는데 나중에는 urlDict.keys()로 여러 게시판 콘텐츠 다 가져올 예정 (기사 가져온 게시판도 있어서 일단 공지사항만 함)
-        self.setAndMoveUrlByBoardOf("notice")
 
         while self.isRemaiedPaegs():
             try:
@@ -32,9 +35,14 @@ class NowonEoullim(Crawl):
                 threads = []
 
             if self.currentPage == 1:
-                pinnedContentTreads = self.driver.find_elements(By.CLASS_NAME, "#bo_notice")
-                self.appendPinnedContentLinkOf(threads)
-                threads = threads[len(pinnedContentTreads):]
+                try:
+                    pinnedContentTreads = self.driver.find_elements(By.CLASS_NAME, "bo_notice")
+                    self.appendPinnedContentLinkOf(threads)
+                    threads = threads[len(pinnedContentTreads):]
+
+                except Exception as e:
+                    print(e, ": 첫 페이지 상단 고정된 공지 게시글들 가져오기 실패")
+                    threads = threads[13:]
 
             isContentLeftAfterLastCrawlDate = self.appendNormalContentLinkOf(threads)
             if isContentLeftAfterLastCrawlDate:
@@ -71,10 +79,17 @@ class NowonEoullim(Crawl):
 
     def getTotalContentsLength(self):
         contentsLengthPerPage = self.getContentsLengthPerPage()
-        self.contentsLength = int(self.driver.find_element(By.CSS_SELECTOR, "#bo_list_total > span").text.split(' ')[-1][:-1])
-        self.pageLength = self.contentsLength // contentsLengthPerPage
-        if self.contentsLength % contentsLengthPerPage:
-            self.pageLength += 1
+        try:
+            threadOfContentsLength = self.driver.find_element(By.CSS_SELECTOR, "#bo_list_total")
+            self.contentsLength = int(threadOfContentsLength.find_element(By.TAG_NAME, "span").text.split(' ')[-1][:-1])
+            self.pageLength = self.contentsLength // contentsLengthPerPage
+            if self.contentsLength % contentsLengthPerPage:
+                self.pageLength += 1
+        
+        except Exception as e:
+            print(e, ": 게시글 총 개수 가져오기 실패")
+            self.pageLength = 12
+            self.contentsLength = 350
 
     def getSite(self):
         return "노원장애인자립생활센터어울림"
