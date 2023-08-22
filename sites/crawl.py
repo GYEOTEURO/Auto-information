@@ -108,7 +108,6 @@ class Crawl:
         return None
     
     def appendContentLinkOf(self, threads):
-        self.contentLinks = []
         for thread in threads:
             date = self.getOutsideDate(thread)
             if date <= self.latestCrawlDate:
@@ -199,4 +198,3 @@ class Crawl:
         self.openBrowser()
         self.makeCrawlingResultToDataframe()
         self.saveDataframeToCSV()
-        print(self.fileName)
