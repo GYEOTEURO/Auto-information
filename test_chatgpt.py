@@ -16,7 +16,7 @@ def get_openai_response(prompt, print_output=False):
         engine='text-davinci-003',  # Determines the quality, speed, and cost.
         temperature=0.5,            # Level of creativity in the response
         prompt=prompt,           # What the user typed in
-        max_tokens=1100,             # Maximum tokens in the prompt AND response
+        max_tokens=2000,             # Maximum tokens in the prompt AND response
         # n=1,                        # The number of completions to generate
         stop=['BYOURSIDE_DONE'],                  # An optional setting to control response generation
     )
