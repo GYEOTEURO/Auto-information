@@ -90,6 +90,7 @@ class Crawl:
 
     def makeContentLinkGroup(self) -> None:
         self.getTotalContentsLength()
+        self.contentLinks = []
 
         while self.isRemaiedPaegs():
             try:
@@ -98,7 +99,6 @@ class Crawl:
                 print(e, ": 게시글 리스트 크롤링 실패")
                 threads = []
 
-            self.contentLinks = []
             for thread in threads:
                 date = self.getOutsideDate(thread)
                 if date <= self.latestCrawlDate:
