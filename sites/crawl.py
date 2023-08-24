@@ -54,11 +54,16 @@ class Crawl:
         return 10
 
     def getTotalContentsLength(self):
-        contentsLengthPerPage = self.getContentsLengthPerPage()
-        self.contentsLength = int(self.driver.find_element(By.CSS_SELECTOR, "#dataForm > div > div.bd-info > div.total > strong").text)
-        self.pageLength = self.contentsLength // contentsLengthPerPage
-        if self.contentsLength % contentsLengthPerPage:
-            self.pageLength += 1
+        try:
+            contentsLengthPerPage = self.getContentsLengthPerPage()
+            self.contentsLength = int(self.driver.find_element(By.CSS_SELECTOR, "#dataForm > div > div.bd-info > div.total > strong").text)
+            self.pageLength = self.contentsLength // contentsLengthPerPage
+            if self.contentsLength % contentsLengthPerPage:
+                self.pageLength += 1
+
+        except Exception as e:
+            print(e, ": 전체 게시글 수 가져오기 실패")
+            
 
     def isRemaiedPaegs(self):
         if self.currentPage <= self.pageLength:
