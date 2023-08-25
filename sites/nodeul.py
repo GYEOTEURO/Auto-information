@@ -121,9 +121,7 @@ class Nodeul(Crawl):
     
     def getInsideDate(self):
         try:
-            date = self.driver.find_element(By.CLASS_NAME, "top_area ngeb").find_element(By.CLASS_NAME, "fr")
-            print(date)
-            date = date.find_element(By.TAG_NAME, 'span').text
+            date = self.driver.find_elements(By.CLASS_NAME, "fr")[1].find_element(By.TAG_NAME, 'span').text
             date = datetime.strptime(date, '%Y.%m.%d %H:%M')
         except Exception as e:
             print(e, ": 게시글 안의 날짜 가져오기 실패")
