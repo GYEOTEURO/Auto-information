@@ -8,7 +8,7 @@ class Nodeul(Crawl):
 
 
     def __init__(self, url, latestCrawlDate='2023-01-01') -> None:
-        super().__init__("nodeul_article_text", url, latestCrawlDate)
+        super().__init__("nodeul", url, latestCrawlDate)
 
     def movetoNextPage(self) -> None:
         self.currentPage += 1
