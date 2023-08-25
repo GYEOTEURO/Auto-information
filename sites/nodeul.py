@@ -28,7 +28,7 @@ class Nodeul(Crawl):
         try:
             firstThreadOfPage = self.driver.find_elements(By.CSS_SELECTOR, "#bd_224_0 > div.bd_lst_wrp > ol > li")[0]
             dateOfFirstContent = self.getOutsideDate(firstThreadOfPage)
-            if dateOfFirstContent >= self.latestCrawlDate:
+            if dateOfFirstContent > self.latestCrawlDate:
                 return True
             
         except Exception as e:
@@ -93,7 +93,7 @@ class Nodeul(Crawl):
     def getContent(self):
         content = ''
         try:
-            threadsOfContent = self.driver.find_element(By.CLASS_NAME, "rd_body clear")[0].find_elements(By.TAG_NAME, 'p')
+            threadsOfContent = self.driver.find_element(By.TAG_NAME,"article").find_elements(By.TAG_NAME, 'p')
             for thread in threadsOfContent:
                 content += thread.text + '\n'
 
@@ -112,9 +112,9 @@ class Nodeul(Crawl):
     def getImage(self):
         images = []
         try:
-            threadsOfImage = self.driver.find_element(By.CLASS_NAME,"rd_body clear")[0].find_elements(By.TAG_NAME, 'img')
+            threadsOfImage = self.driver.find_element(By.TAG_NAME,"article").find_elements(By.TAG_NAME, 'img')
             for thread in threadsOfImage:
-                imageLink = thread.getAttridute('src')
+                imageLink = thread.get_attribute('src')
                 images.append(imageLink)
         except Exception as e:
             print(e, ": image 가져오기 실패")
@@ -123,7 +123,9 @@ class Nodeul(Crawl):
     
     def getInsideDate(self):
         try:
-            date = self.driver.find_element(By.CLASS_NAME, "date m_no").text
+            date = self.driver.find_element(By.CLASS_NAME, "top_area ngeb").find_element(By.CLASS_NAME, "fr")
+            print(date)
+            date = date.find_element(By.TAG_NAME, 'span').text
             date = datetime.strptime(date, '%Y.%m.%d %H:%M')
         except Exception as e:
             print(e, ": 게시글 안의 날짜 가져오기 실패")
