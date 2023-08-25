@@ -72,7 +72,6 @@ class Nodeul(Crawl):
                 return False
             else:
                 contentLink = self.getContentLink(thread)
-                print(f"{date} : {contentLink}")
 
                 if not self.isSecretContent(thread):
                     self.contentLinks.append(contentLink)

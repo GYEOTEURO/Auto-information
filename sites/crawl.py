@@ -119,7 +119,6 @@ class Crawl:
                 return False
             else:
                 contentLink = self.getContentLink(thread)
-                print(f"{date} : {contentLink}")
                 self.contentLinks.append(contentLink)
         return True
 
