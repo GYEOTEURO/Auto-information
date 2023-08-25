@@ -8,7 +8,7 @@ class Nodeul(Crawl):
 
 
     def __init__(self, url, latestCrawlDate='2023-01-01') -> None:
-        super().__init__("nodeul", url, latestCrawlDate)
+        super().__init__("nodeul_article_text", url, latestCrawlDate)
 
     def movetoNextPage(self) -> None:
         self.currentPage += 1
@@ -93,9 +93,7 @@ class Nodeul(Crawl):
     def getContent(self):
         content = ''
         try:
-            threadsOfContent = self.driver.find_element(By.TAG_NAME,"article").find_elements(By.TAG_NAME, 'p')
-            for thread in threadsOfContent:
-                content += thread.text + '\n'
+            content  = self.driver.find_element(By.TAG_NAME,"article").text
 
         except Exception as e:
             print(e, ": content 가져오기 실패")
