@@ -128,7 +128,6 @@ class NowonEoullim(Crawl):
                 images.append(imgLink)
         except Exception as e:
             print(e, ": 이미지 가져오기 실패 혹은 없음")
-            images = []
 
         return images
     
