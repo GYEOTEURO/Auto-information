@@ -53,7 +53,21 @@ class Crawl:
             print(e, f': Apply format to {self.fileName}.csv')
 
     def getContentsLengthPerPage(self):
-        return 10
+        try:
+            threads = self.getContentThreads()
+        except Exception as e:
+            print(e, ": 페이지 별 게시글 개수 가져오기 실패")
+            return 10
+        
+        return len(threads)
+    
+    def getContentThreads(self, selector = "#container > section.cinner > div > div.bd-list > table > tbody > tr"):
+        try:
+            threads = self.driver.find_elements(By.CSS_SELECTOR, selector)
+        except Exception as e:
+            print(e, ": 게시글 목록에서 게시글 thread 가져오기 실패")
+
+        return threads
 
     def getTotalContentsLength(self):
         try:
