@@ -115,7 +115,7 @@ class Crawl:
 
         while self.isRemaiedPaegs():
             try:
-                threads = self.driver.find_elements(By.CSS_SELECTOR, "#container > section.cinner > div > div.bd-list > table > tbody > tr")
+                threads = self.getContentThreads("#container > section.cinner > div > div.bd-list > table > tbody > tr")
             except Exception as e:
                 print(e, ": 게시글 리스트 크롤링 실패")
                 threads = []
