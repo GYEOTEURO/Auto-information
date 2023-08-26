@@ -40,23 +40,20 @@ class NowonEoullim(Crawl):
             if self.currentPage == 1:
                 try:
                     pinnedContentTreads = self.driver.find_elements(By.CLASS_NAME, "bo_notice")
-                    self.appendPinnedContentLinkOf(threads)
+                    self.appendContentLinkOf(pinnedContentTreads)
                     threads = threads[len(pinnedContentTreads):]
 
                 except Exception as e:
                     print(e, ": 첫 페이지 상단 고정된 공지 게시글들 가져오기 실패")
                     threads = threads[13:]
 
-            isContentLeftAfterLastCrawlDate = self.appendNormalContentLinkOf(threads)
+            isContentLeftAfterLastCrawlDate = self.appendContentLinkOf(threads)
             if isContentLeftAfterLastCrawlDate:
                 self.movetoNextPage()
             else:
                 break
 
         return None
-    
-    def appendNormalContentLinkOf(self, threads):
-        return super().appendContentLinkOf(threads)
     
     def appendPinnedContentLinkOf(self, threads):
         for thread in threads:
