@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # 마포장애인가족지원센터
 
 from selenium import webdriver

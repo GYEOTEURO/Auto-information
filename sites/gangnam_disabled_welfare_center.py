@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # 강남장애인복지관
 
 from selenium import webdriver

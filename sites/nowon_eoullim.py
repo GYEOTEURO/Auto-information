@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from crawl import Crawl
 from selenium.webdriver.common.by import By
 import time

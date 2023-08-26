@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # 강북장애인종합복지관
 
 from selenium import webdriver
