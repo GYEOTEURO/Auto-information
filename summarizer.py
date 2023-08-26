@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from bardapi import Bard, BardCookies
 from bardapi.constants import SESSION_HEADERS
 import openai
