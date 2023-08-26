@@ -79,7 +79,7 @@ class NowonEoullim(Crawl):
 
     def getContentsLengthPerPage(self):
         try:
-            threads = self.driver.find_elements(By.CSS_SELECTOR, "#fboardlist > div > table > tbody > tr")
+            threads = self.getContentThreads("#fboardlist > div > table > tbody > tr")
         except Exception as e:
             print(e)
             return 30
