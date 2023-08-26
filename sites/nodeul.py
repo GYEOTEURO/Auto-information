@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium .webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
+import re
 
 class Nodeul(Crawl):
 
@@ -105,7 +106,8 @@ class Nodeul(Crawl):
         return content
     
     def removeEmailAddress(self, content):
-        content = content.replace('nodl@hanmail.net', '노들장애인자립생활센터 이메일 주소')
+        emailPattern = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+        content = re.sub(pattern=emailPattern, repl='노들장애인자립생활센터 이메일 주소', string=content)
         return content
         
     def getImage(self):
