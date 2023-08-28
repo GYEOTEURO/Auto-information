@@ -80,9 +80,10 @@ class Summarizer:
                 print(e, ": Make summary result csv file")
 
     def organizeSummary(self, summary):
-        summary  = summary.replace("*", "")
-        summary = summary.replace("{", "$").replace("}", "$")
-        summary = '{' + summary.split("$")[1] + '}'
+        if self.gptName == "Bard":
+            summary  = summary.replace("*", "")
+            summary = summary.replace("{", "$").replace("}", "$")
+            summary = '{' + summary.split("$")[1] + '}'
 
         try:
             summary = json.loads(summary)
@@ -94,8 +95,14 @@ class Summarizer:
     
 
     def organizeDetection(self, detection):
-        detection = detection.replace("{", "$").replace("}", "$")
-        detection = "{" + detection.split("$")[1] + "}"
+        if self.gptName == "Bard":
+            detection = detection.replace("{", "$").replace("}", "$")
+            detection = "{" + detection.split("$")[1] + "}"
+        
+        elif self.gptName == "chatGPT":
+            detection = detection.replace("답변 : ", "")
+            print(detection)
+
         try:
             detection = json.loads(detection)
         except json.decoder.JSONDecodeError as e:
@@ -116,6 +123,23 @@ class Summarizer:
              return category
         else:
             return defaultCategory
+        
+    def get_openai_response(self, prompt, print_output=False):
+        completions = self.gpt.create(
+            engine='text-davinci-003',  # Determines the quality, speed, and cost.
+            temperature=0.5,            # Level of creativity in the response
+            prompt=prompt,           # What the user typed in
+            max_tokens=2000,             # Maximum tokens in the prompt AND response
+            # n=1,                        # The number of completions to generate
+            stop=['BYOURSIDE_DONE'],                  # An optional setting to control response generation
+        )
+        # Displaying the output can be helpful if things go wrong
+        if print_output:
+            for choice in completions.choices:
+                print(choice.text)
+
+        # Return the first choice's text
+        return completions.choices[0].text
     
     def getSummaryAndCategoryAndDisabilityTypeAndRegion(self, content):
         summaryPrompt = content + constants['prompt']['summary']
@@ -128,8 +152,8 @@ class Summarizer:
             summary = self.organizeSummary(summary)
 
             
-            prompt = summary + constants['prompt']['detect']
-            detection = self.gpt.get_answer(prompt)['content']
+            detectPrompt = summary + constants['prompt']['detect']
+            detection = self.gpt.get_answer(detectPrompt)['content']
             print("-----------")
             print("json 전처리 결과:")
             print(detection)
@@ -137,20 +161,20 @@ class Summarizer:
             print("-------------")
             print("json 후처리 결과: \n")
             print(detection)
-            disabilityType = detection['disability_type']
-            category = self.organizeCategory(detection['category'])
-            region = self.organizeRegion(detection['region'])
 
         elif self.gptName == "chatGPT":
-            summaryResponse = self.gpt.create(
-                engine='text-davinci-003',  # Determines the quality, speed, and cost.
-                temperature=0.5,            # Level of creativity in the response
-                prompt=summaryPrompt,           # What the user typed in
-                max_tokens=2000,             # Maximum tokens in the prompt AND response
-                # n=1,                        # The number of completions to generate
-                stop=['BYOURSIDE_DONE'],                  # An optional setting to control response generation
-            )
-            print(summaryResponse.choices[0])
+            summaryResponse = self.get_openai_response(summaryPrompt, True)
+            print(summaryResponse)
+            summary = self.organizeSummary(summaryResponse)
+
+            detectPrompt = summary + constants['prompt']['detect']
+            detection = self.get_openai_response(detectPrompt, True)
+            print(detection)
+            detection = self.organizeDetection(detection)
+        
+        disabilityType = detection['disability_type']
+        category = self.organizeCategory(detection['category'])
+        region = self.organizeRegion(detection['region'])
 
 
         return summary, category, disabilityType, region
@@ -187,6 +211,14 @@ class chatGPT(Summarizer):
 
 
 if __name__ == "__main__":
+    content = '''<2023년 장애 인식 교육 안내> 
+학급 내 장애에 대한 이해 증진과 인식의 변화를 도모하고자 강남구 내 유치원· 초·중·고 학생들을 대상으로 장애인식개선 교육을 실시합니다. 많은 관심과 신청 부탁 드립니다.
+1) 신청 기간: ~11/30까지 모집
+2) 교육 일정: 2023년 학기 중
+3) 교육 내용: 일상생활에서 경험하는 점자 & 점자 표기 교육, 과자/음료/젤리에 직접 점자 라벨 부착 체험 
+4) 교육 대상: 영유아, 어린이집, 유치원, 초·중·고 학생
+5) 문의 및 신청: 권익옹호팀 백건현(02-560-4233) / 복지관 이메일 주소  '''
+    prompt = content + constants['prompt']['summary']
     c = Summarizer("chatGPT")
-    c.setFileName("seoul_edu")
-    c.summarizeContents()
+    s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
+    print(s, c, d, r)
