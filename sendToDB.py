@@ -23,22 +23,27 @@ def getCrawledFileNames():
 
 
 # Summarize 인스턴스 생성
-bardSummarizer = Summarizer("Bard")
+summarizer = Summarizer("chatGPT")
 
 # 반복문으로 result/summary에 있는 csv 파일 하나씩 가져오면서 summarize 진행
     # summarize 진행 후 df 가져와서 DB로 보내기
 files = getCrawledFileNames()
-for file in files:
-    fileName = file[:-4]
-    bardSummarizer.setFileName(fileName)
-    bardSummarizer.summarizeContents()
-    bardSummarizer.saveDataframeToCSV()
-    
-    bardSummarizer.df.drop(['Unnamed: 0'], axis = 1, inplace = True)
-    print(bardSummarizer.df.info())
+print(files)
 
-    for i in bardSummarizer.df.index:
-        data = bardSummarizer.df.loc[i].to_dict()
+for file in files[2:]:
+    fileName = file[:-4]
+    summarizer.setFileName(fileName)
+    summarizer.loadDataframe()
+    summarizer.summarizeContents()
+    summarizer.saveDataframeToCSV()
+    
+    summarizer.df.drop(['Unnamed: 0'], axis = 1, inplace = True)
+    summarizer.df = summarizer.df.astype({"category" : "str"})
+    print("++++\n", summarizer.df.dtypes)
+
+    for i in summarizer.df.index:
+        data = summarizer.df.loc[i].to_dict()
+        data['region'] = data['region'].split(',')
         print(data)
 
         # autoInformation(collection) - 카테고리명(doc) - posts(collection) - 개별 post(doc)

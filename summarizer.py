@@ -75,6 +75,7 @@ class Summarizer:
         
     def saveDataframeToCSV(self):
             try:
+                self.df = self.df.astype({"category" : "string"})
                 self.df.to_csv(f'result/summary/{self.fileName}.csv', mode='a')
             except Exception as e:
                 print(e, ": Make summary result csv file")
@@ -95,13 +96,8 @@ class Summarizer:
     
 
     def organizeDetection(self, detection):
-        if self.gptName == "Bard":
-            detection = detection.replace("{", "$").replace("}", "$")
-            detection = "{" + detection.split("$")[1] + "}"
-        
-        elif self.gptName == "chatGPT":
-            detection = detection.replace("답변 : ", "")
-            print(detection)
+        detection = detection.replace("{", "$").replace("}", "$")
+        detection = "{" + detection.split("$")[1] + "}"
 
         try:
             detection = json.loads(detection)
@@ -115,11 +111,26 @@ class Summarizer:
             region = "전체"
         elif region == "서울" or region == "서울특별시":
             region = "서울시"
-        return [region]
+        return region
+    
+    def organizeDisabilityType(self, disabilityTypes):
+        types = []
+        print("전처리: ", disabilityTypes)
+        if disabilityTypes == "전체":
+            return disabilityTypes
+        elif "발달" in disabilityTypes:
+            types.append("발달")
+        elif "뇌병변" in disabilityTypes:
+            types.append("뇌병변")
+        
+        if len(types) == 1:
+            return types[0]
+        else:
+            return "전체"
         
     def organizeCategory(self, category):
-        defaultCategory = "교육/활동"
-        if category in ["교육/활동", "보조기기", "지원금", "돌봄 서비스"]:
+        defaultCategory = "교육"
+        if category in ["교육", "보조기기", "지원금", "돌봄 서비스"]:
              return category
         else:
             return defaultCategory
@@ -127,7 +138,7 @@ class Summarizer:
     def get_openai_response(self, prompt, print_output=False):
         completions = self.gpt.create(
             engine='text-davinci-003',  # Determines the quality, speed, and cost.
-            temperature=0.5,            # Level of creativity in the response
+            temperature=0.3,            # Level of creativity in the response
             prompt=prompt,           # What the user typed in
             max_tokens=2000,             # Maximum tokens in the prompt AND response
             # n=1,                        # The number of completions to generate
@@ -163,18 +174,18 @@ class Summarizer:
             print(detection)
 
         elif self.gptName == "chatGPT":
-            summaryResponse = self.get_openai_response(summaryPrompt, True)
-            print(summaryResponse)
+            summaryResponse = self.get_openai_response(summaryPrompt)
             summary = self.organizeSummary(summaryResponse)
+            print(summary)
 
             detectPrompt = summary + constants['prompt']['detect']
-            detection = self.get_openai_response(detectPrompt, True)
-            print(detection)
+            detection = self.get_openai_response(detectPrompt)
             detection = self.organizeDetection(detection)
         
-        disabilityType = detection['disability_type']
+        disabilityType = self.organizeDisabilityType(detection['disability_type'])
         category = self.organizeCategory(detection['category'])
         region = self.organizeRegion(detection['region'])
+        print(f"게시판: {category}, 장애유형: {disabilityType}, 지역: {region}")
 
 
         return summary, category, disabilityType, region
@@ -220,5 +231,6 @@ if __name__ == "__main__":
 5) 문의 및 신청: 권익옹호팀 백건현(02-560-4233) / 복지관 이메일 주소  '''
     prompt = content + constants['prompt']['summary']
     c = Summarizer("chatGPT")
-    s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
-    print(s, c, d, r)
+    # s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
+    # print(s, c, d, r)
+    print(c.organizeCategory("공지"))
