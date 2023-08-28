@@ -18,8 +18,8 @@ def sendToDB(df):
     pass
 
 # 파일들 이름 가져오기
-def getSummarizedFileNames():
-    return os.listdir("result/summary")
+def getCrawledFileNames():
+    return os.listdir("result/crawl")
 
 
 # Summarize 인스턴스 생성
@@ -27,21 +27,22 @@ bardSummarizer = Summarizer("Bard")
 
 # 반복문으로 result/summary에 있는 csv 파일 하나씩 가져오면서 summarize 진행
     # summarize 진행 후 df 가져와서 DB로 보내기
-files = getSummarizedFileNames()
+files = getCrawledFileNames()
 for file in files:
     fileName = file[:-4]
     bardSummarizer.setFileName(fileName)
     bardSummarizer.summarizeContents()
+    bardSummarizer.saveDataframeToCSV()
     
     bardSummarizer.df.drop(['Unnamed: 0'], axis = 1, inplace = True)
-    print(bardSummarizer.df)
+    print(bardSummarizer.df.info())
 
     for i in bardSummarizer.df.index:
         data = bardSummarizer.df.loc[i].to_dict()
         print(data)
 
         # autoInformation(collection) - 카테고리명(doc) - posts(collection) - 개별 post(doc)
-        doc_ref = db.collection('autoInformation').document(data['category']).collection('posts').document()
+        doc_ref = db.collection('autoInformation').document(data['category']).collection('autoInformation_posts').document()
 
         # 유의미한 ID를 두지 않고 Cloud Firestore에서 자동으로 ID를 생성 : add() , document().set()
         doc_ref.set(data)
