@@ -38,11 +38,6 @@ try:
 except Exception as e:
     print(e, f': Apply format to {fileName}.csv')
 
-            
-now_date = datetime.datetime.now()
-before_one_month = now_date + relativedelta(months=-1)
-
-print(str(before_one_month))
 
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
@@ -51,9 +46,6 @@ url = "https://ilovenambu.or.kr/bbs/board.php?bo_table=0102"
 driver.get(url)
 # Find all the rows within the tbody element
 rows = driver.find_elements(By.TAG_NAME, 'tr')
-
-# Get the current date
-current_date = datetime.date.today()
 
 # Collect the post links
 post_links = []
@@ -65,11 +57,7 @@ for row in rows:
             date_string = columns[3].text.strip()  # Remove whitespace
             post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()  # Fixed date format
 
-            # Calculate date difference
-            date_diff = (current_date - post_date).days
-
-            if date_diff <= 30:
-            # TODO: if uploadDate > lastCrawlDate:
+            if post_date > lastCrawlDate:
                 link_element = columns[1].find_element(By.TAG_NAME, 'a')
                 link = link_element.get_attribute('href')
                 post_links.append(link)
@@ -97,18 +85,18 @@ for link in post_links:
             
             # 정규표현식을 사용하여 날짜 문자열에서 숫자 부분 추출
             date_numbers = re.findall(r'\d+', date_string)
-            
+
             # 추출한 숫자를 이용하여 datetime 객체 생성
             year = int(date_numbers[0])
             month = int(date_numbers[1])
             day = int(date_numbers[2])
-            crawled_date = datetime(year, month, day)
-            
-            print("Crawled date:", crawled_date)
-            
+
+            crawled_date_obj = datetime.datetime(year, month, day)
+
         except Exception as e:
             print(e, "date crawling failed")
-            crawled_date = None
+            crawled_date_obj = None
+
 
         try:
             content_element = driver.find_element(By.XPATH, "//div[@id='bo_v_con']")
@@ -137,7 +125,7 @@ for link in post_links:
                 pass
 
         except Exception as e:
-            print(e, "Image crawling failed")
+            print("Image crawling failed")
         
 
         # Append the extracted data to lists
@@ -146,7 +134,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(crawled_date)
+        dates.append(crawled_date_obj)
         contents.append(content)
         images.append(image_urls)
         originalLinks.append(link)
