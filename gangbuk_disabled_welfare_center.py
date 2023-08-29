@@ -6,6 +6,9 @@ import time
 from datetime import date, timedelta, datetime
 from save_csv import saveCsv
 
+# 마지막 크롤링 날짜
+global lastCrawlDate
+
 sites = []
 regions = []
 categories = []
@@ -16,9 +19,6 @@ contents = []
 contentLinks = []
 images = []
 
-today = date.today()
-one_week = timedelta(weeks=1)
-last_week = today - one_week*20
 
 def strToDate(strDate):
     dateTime = datetime.strptime(strDate, '%y-%m-%d')
@@ -38,8 +38,9 @@ postList = driver.find_element(By.CLASS_NAME, 'gallery_list').find_elements(By.C
 
 for post in postList:
     uploadDate = post.find_element(By.CLASS_NAME, 'g_day').text
+    uploadDate = strToDate(uploadDate.split('\n')[0])
 
-    if strToDate(uploadDate.split('\n')[0]) > last_week:
+    if uploadDate > lastCrawlDate:
         link = post.find_element(By.TAG_NAME, 'a')
         title = post.find_element(By.CLASS_NAME, 'g_title').text
         linkText = link.get_attribute('href')
