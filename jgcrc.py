@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
+global lastCrawlDate
+
 fileName = 'jgcrc'
 siteName = '서울특별시중구장애인복지관'
 region = ['서울시','중구']
@@ -40,7 +42,6 @@ except Exception as e:
 now_date = datetime.datetime.now()
 before_one_month = now_date + relativedelta(months=-1)
 
-print(str(before_one_month))
 
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
@@ -66,6 +67,7 @@ for row in rows:
 
         # 포스트가 30일 이내에 작성된 것인지 확인
         if date_diff <= 30:
+        # TODO: if uploadDate > lastCrawlDate:
             # 30일 이내에 작성된 포스트의 경우 링크를 수집
             link_element = row.find_element(By.TAG_NAME, 'a')
             link = link_element.get_attribute('href')
@@ -89,11 +91,13 @@ for link in post_links:
         
         try:
             author_date = driver.find_element(By.CLASS_NAME, 'view_info').text
-            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD 형식의 패턴
+            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD format pattern
             author_date = re.search(date_pattern, author_date).group()
+            # YYYY.MM.DD 형식의 날짜 문자열을 datetime 객체로 변환
+            extracted_date_obj = datetime.strptime(author_date, '%Y.%m.%d')
         except Exception as e:
             print(e, "authorDate 크롤링 실패")
-            author_date = current_date
+            extracted_date_obj = None
         
         try:
             content = driver.find_element(By.CLASS_NAME, 'view_detail').text
@@ -115,7 +119,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(author_date)
+        dates.append(extracted_date_obj)
         contents.append(content)
         images.append(image_url)
 
