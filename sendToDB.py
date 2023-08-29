@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 import asyncio
 import requests
-from datetime import datetime 
+from datetime import datetime
 
 load_dotenv()
 
@@ -81,7 +81,7 @@ async def main():
         summarizer.df["region"] = [summarizer.df.loc[i]['region'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
         summarizer.df["image"] = [summarizer.df.loc[i]['image'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
         summarizer.df["image"] = sendImagesToStorage(fileName, summarizer.df["image"].tolist())
-        summarizer.df["post_date"] = datetime.now()
+        summarizer.df["post_date"] = datetime.utcnow()
         print(summarizer.df["image"].tolist())
 
         for i in summarizer.df.index:
