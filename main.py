@@ -20,6 +20,7 @@ def runCrawling():
   print(crawlFiles)
 
   # for crawlFile in crawlFiles:
+  #   crawlFile = 'sites/' + crawlFile
   #   print("-------------------")
   #   print(crawlFile, "실행 시작")
   #   try:
@@ -31,5 +32,14 @@ def runCrawling():
     
   # updateLatestDate()
 
+def runSendingSummariesToDB():
+  try:
+    subprocess.run(["python", 'sendToDB.py'])
+    print("summaries DB 전송 완료")
+
+  except Exception as e:
+    print(e, ": summaries DB 전송 완료")
+
 if __name__ == "__main__":
     runCrawling()
+    runSendingSummariesToDB()
