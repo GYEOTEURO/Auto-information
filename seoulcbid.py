@@ -43,9 +43,6 @@ def find_post_links():
     # Find all the rows within the tbody element
     rows = driver.find_elements(By.XPATH, '//tbody/tr')
 
-    # Get the current date
-    current_date = datetime.date.today()
-
     # Collect the post links with dates
     post_links = []
 
@@ -59,12 +56,8 @@ def find_post_links():
             # Extract the date from the string
             post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d')
 
-            # Calculate the date difference in days
-            date_diff = (current_date - post_date.date()).days
-
             # Check if the post is within the last month
-            if date_diff <= 30:
-            # TODO: if current_date > lastCrawlDate:
+            if post_date > lastCrawlDate:
                 # Find the link to the post within the row
                 link_element = row.find_element(By.XPATH, './/a[contains(@href, "wr_id=")]')
                 link = link_element.get_attribute('href')
