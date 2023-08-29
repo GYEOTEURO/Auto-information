@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
+global lastCrawlDate
+
 fileName = 'ilovenambu'
 siteName = '서울특별시립 남부장애인종합복지관'
 region = ['서울시', '남부']
@@ -67,6 +69,7 @@ for row in rows:
             date_diff = (current_date - post_date).days
 
             if date_diff <= 30:
+            # TODO: if uploadDate > lastCrawlDate:
                 link_element = columns[1].find_element(By.TAG_NAME, 'a')
                 link = link_element.get_attribute('href')
                 post_links.append(link)
@@ -91,9 +94,21 @@ for link in post_links:
         try:
             date_element = driver.find_element(By.XPATH, "//section[@id='bo_v_info']//span[contains(@class, 'sound_only') and contains(text(), '작성일')]")
             date_string = date_element.find_element(By.XPATH, "./following-sibling::strong").text.split()[0]
+            
+            # 정규표현식을 사용하여 날짜 문자열에서 숫자 부분 추출
+            date_numbers = re.findall(r'\d+', date_string)
+            
+            # 추출한 숫자를 이용하여 datetime 객체 생성
+            year = int(date_numbers[0])
+            month = int(date_numbers[1])
+            day = int(date_numbers[2])
+            crawled_date = datetime(year, month, day)
+            
+            print("Crawled date:", crawled_date)
+            
         except Exception as e:
             print(e, "date crawling failed")
-            date_string = ""
+            crawled_date = None
 
         try:
             content_element = driver.find_element(By.XPATH, "//div[@id='bo_v_con']")
@@ -131,7 +146,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(date_string)
+        dates.append(crawled_date)
         contents.append(content)
         images.append(image_urls)
         originalLinks.append(link)
