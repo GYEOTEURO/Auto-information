@@ -33,3 +33,6 @@ model_parameter:
 chunk_size  :
   small : 1000
   large : 2000
+
+crawl:
+  latest_date: '2023-06-01'

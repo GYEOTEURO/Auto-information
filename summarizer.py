@@ -8,13 +8,9 @@ from dotenv import load_dotenv
 import requests
 import pandas as pd
 import json
-import yaml
+from main import constants
 import asyncio
 import textwrap
-
-# Summarize에 쓸 constants load
-with open('constants.yaml', encoding='UTF-8') as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)
 
 '''
 # session 을 유지하고 싶을 경우
