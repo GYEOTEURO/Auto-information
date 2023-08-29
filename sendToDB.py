@@ -21,11 +21,15 @@ db = firestore.client()
 bucket = storage.bucket()
 
 def sendDataToDB(data) -> None:
-    # autoInformation(collection) - 카테고리명(doc) - posts(collection) - 개별 post(doc)
-    doc_ref = db.collection('autoInformation').document(data['category']).collection('autoInformation_posts').document()
+    try:
+        # autoInformation(collection) - 카테고리명(doc) - posts(collection) - 개별 post(doc)
+        doc_ref = db.collection('autoInformation').document(data['category']).collection('autoInformation_posts').document()
 
-    # 유의미한 ID를 두지 않고 Cloud Firestore에서 자동으로 ID를 생성 : add() , document().set()
-    doc_ref.set(data)
+        # 유의미한 ID를 두지 않고 Cloud Firestore에서 자동으로 ID를 생성 : add() , document().set()
+        doc_ref.set(data)
+
+    except Exception as e:
+        print(e, ": data Firestore 전송 실패")
 
 def sendImagesToStorage(fileName, imageUrlsGroup):
     storageUrlsGroup = []
@@ -77,6 +81,7 @@ async def main():
         summarizer.df["region"] = [summarizer.df.loc[i]['region'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
         summarizer.df["image"] = [summarizer.df.loc[i]['image'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
         summarizer.df["image"] = sendImagesToStorage(fileName, summarizer.df["image"].tolist())
+        summarizer.df["post_date"] = datetime.now()
         print(summarizer.df["image"].tolist())
 
         for i in summarizer.df.index:
