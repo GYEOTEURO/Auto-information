@@ -9,6 +9,8 @@ import requests
 import pandas as pd
 import json
 import yaml
+import asyncio
+import textwrap
 
 # Summarize에 쓸 constants load
 with open('constants.yaml', encoding='UTF-8') as f:
@@ -93,6 +95,28 @@ class Summarizer:
         summary = summary['summary'] 
 
         return summary
+
+    async def generateSummary(self, content):
+
+        text = content
+        max_cycle = int(len(text) / constants['chunk_size']['small']) + 1
+        summaryPrompt = constants['prompt']['summary']
+        summary = ''
+
+        for cycle in range(max_cycle):
+            chunks = textwrap.wrap(text, constants['chunk_size']['small'])
+
+            if len(chunks) == 1:
+                summary = await self.get_openai_response(text + summaryPrompt)
+                break
+
+            tasks = [self.get_openai_response(chunk + summaryPrompt) for chunk in chunks]
+            chunkSummaries = await asyncio.gather(*tasks)
+            summary = ' '.join(chunkSummaries)
+
+            text = summary
+
+        return summary
     
 
     def organizeDetection(self, detection):
@@ -135,14 +159,12 @@ class Summarizer:
         else:
             return defaultCategory
         
-    def get_openai_response(self, prompt, print_output=False):
+    async def get_openai_response(self, prompt, print_output=False):
         completions = self.gpt.create(
-            engine='text-davinci-003',  # Determines the quality, speed, and cost.
-            temperature=0.3,            # Level of creativity in the response
-            prompt=prompt,           # What the user typed in
-            max_tokens=2000,             # Maximum tokens in the prompt AND response
-            # n=1,                        # The number of completions to generate
-            stop=['BYOURSIDE_DONE'],                  # An optional setting to control response generation
+            engine=constants['model_parameter']['model'], 
+            temperature=constants['model_parameter']['temperature']['low'],            
+            prompt=prompt,
+            max_tokens=constants['model_parameter']['max_token']['1k']
         )
         # Displaying the output can be helpful if things go wrong
         if print_output:
@@ -152,8 +174,8 @@ class Summarizer:
         # Return the first choice's text
         return completions.choices[0].text
     
-    def getSummaryAndCategoryAndDisabilityTypeAndRegion(self, content):
-        summaryPrompt = content + constants['prompt']['summary']
+    async def getSummaryAndCategoryAndDisabilityTypeAndRegion(self, content):
+        summaryPrompt = content + constants['prompt']['summary'] + constants['prompt']['bard_summary']
 
         if self.gptName == "Bard":
             summary = self.gpt.get_answer(summaryPrompt)['content']
@@ -174,12 +196,11 @@ class Summarizer:
             print(detection)
 
         elif self.gptName == "chatGPT":
-            summaryResponse = self.get_openai_response(summaryPrompt)
-            summary = self.organizeSummary(summaryResponse)
+            summary = await self.generateSummary(content)
             print(summary)
 
             detectPrompt = summary + constants['prompt']['detect']
-            detection = self.get_openai_response(detectPrompt)
+            detection = await self.get_openai_response(detectPrompt)
             detection = self.organizeDetection(detection)
         
         disabilityType = self.organizeDisabilityType(detection['disability_type'])
@@ -197,11 +218,11 @@ class Summarizer:
         self.df["disability_type"] = self.disabilityTypes
         self.df["region"] = self.regions
 
-    def summarizeContents(self):
+    async def summarizeContents(self):
         self.loadDataframe()
         contents = self.df['content'].values
         for content in contents:
-            summary, category, disabilityType, region = self.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
+            summary, category, disabilityType, region = await self.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
             self.summaries.append(summary)
             self.categories.append(category)
             self.disabilityTypes.append(disabilityType)
@@ -220,6 +241,14 @@ class chatGPT(Summarizer):
         openai.api_key = os.getenv('OPENAI_API_KEY') 
 
 
+async def test():
+    c = Summarizer("chatGPT")
+    # s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
+    # print(s, c, d, r)
+    c.setFileName("nowon_eoullim")
+    await c.summarizeContents()
+    c.saveDataframeToCSV()
+
 
 if __name__ == "__main__":
     content = '''<2023년 장애 인식 교육 안내> 
@@ -229,8 +258,7 @@ if __name__ == "__main__":
 3) 교육 내용: 일상생활에서 경험하는 점자 & 점자 표기 교육, 과자/음료/젤리에 직접 점자 라벨 부착 체험 
 4) 교육 대상: 영유아, 어린이집, 유치원, 초·중·고 학생
 5) 문의 및 신청: 권익옹호팀 백건현(02-560-4233) / 복지관 이메일 주소  '''
-    prompt = content + constants['prompt']['summary']
-    c = Summarizer("chatGPT")
-    # s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
-    # print(s, c, d, r)
-    print(c.organizeCategory("공지"))
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test())
+    loop.close()
