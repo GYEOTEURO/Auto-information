@@ -7,6 +7,32 @@ from bs4 import BeautifulSoup
 import datetime
 import re
 
+
+global lastCrawlDate
+
+fileName = 'seoulcbid'
+siteName = '서울장애인종합복지관'
+region = ['서울시']
+category = None
+disabilityType = '전체'
+
+
+sites = []
+regions = []
+categories = []
+disabilityTypes = []
+titles = []
+dates = []
+contents = []
+originalLinks = []
+images = []
+
+def removeEmailAddress(content):
+    emailPattern = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+    content = re.sub(pattern=emailPattern, repl='노들장애인자립생활센터 이메일 주소', string=content)
+    return content
+    
+
 def find_post_links():
     s = Service('./chromedriver')
     driver = webdriver.Chrome(service=s)
@@ -38,6 +64,7 @@ def find_post_links():
 
             # Check if the post is within the last month
             if date_diff <= 30:
+            # TODO: if current_date > lastCrawlDate:
                 # Find the link to the post within the row
                 link_element = row.find_element(By.XPATH, './/a[contains(@href, "wr_id=")]')
                 link = link_element.get_attribute('href')
@@ -62,13 +89,12 @@ post_links = find_post_links()
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
 
+
 # Iterate over the post links and extract the data for the posts within the last month
 for wr_id, link, post_date in post_links:
     try:
         # Navigate to the link
         driver.get(link)
-        print(link)
-
         # Wait for the page to load
         time.sleep(3)
 
@@ -76,27 +102,66 @@ for wr_id, link, post_date in post_links:
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, 'html.parser')
 
-        # Extract the title
-        title_element = soup.select_one('h6.pull-left')
-        title = title_element.text.strip() if title_element else None
-        print(f"Title: {title}")
+        # Extract the title (Fix this part if title extraction is not working as expected)
+
+        try:
+            title_element = soup.select_one('div.panel-heading h6')
+            title_text = title_element.text.strip() if title_element else None
+            # Splitting title_text to get the actual title
+            title = title_text[3:]
+        except Exception as e:
+            print(e, ": Title extraction failed")
+            title = None
 
         # Extract the content
         content_element = soup.select_one('#bo_v_con')
         content = content_element.text.strip() if content_element else None
-        print(f"Content: {content}")
+        content = removeEmailAddress(content)
 
         # Extract the images
         image_elements = soup.select('#bo_v_con img')
         image_urls = [img['src'] for img in image_elements]
-        print("Images:")
-        for img_url in image_urls:
-            print(img_url)
 
-        print(f"Date: {post_date}")
+
+
+        # Append data to lists
+        sites.append(siteName)
+        regions.append(region)
+        categories.append(category)
+        disabilityTypes.append(disabilityType)
+        titles.append(title)
+        dates.append(post_date)
+        contents.append(content)
+        originalLinks.append(link)
+        images.append(image_urls)
 
     except Exception as e:
         print(f"Error in post with wr_id {wr_id}: {e}")
 
 # Quit the driver after processing all post links
 driver.quit()
+
+# Create a DataFrame from the collected data
+import pandas as pd
+
+data = {
+    'site': sites,
+    'region': regions,
+    'category': categories,
+    'disability_type': disabilityTypes,
+    'title': titles,
+    'date': dates,
+    'content': contents,
+    'original_link': originalLinks,
+    'content_link': originalLinks,  # Use originalLinks for now
+    'image': images
+}
+
+df = pd.DataFrame(data)
+
+# Save the DataFrame to a CSV file
+try:
+    df.to_csv(f'result/crawl/{fileName}.csv', index=False)
+    print(f"Data saved to result/crawl/{fileName}.csv")
+except Exception as e:
+    print(e, f": Failed to save data to result/crawl/{fileName}.csv")
