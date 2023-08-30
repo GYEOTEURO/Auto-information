@@ -179,7 +179,7 @@ class Crawl:
         pass
 
     def getImage(self):
-        return None
+        return []
     
     def makeCrawlingResultToDataframe(self):
         self.makeContentLinkGroup()

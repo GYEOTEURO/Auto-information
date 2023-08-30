@@ -133,11 +133,11 @@ class Summarizer:
         return detection
     
     def organizeRegion(self, region):
-        if region == "전국":
+        if region == "전국" or region == "전체":
             region = "전체"
         elif region == "서울" or region == "서울특별시":
             region = "서울시"
-        return region
+        return [region]
     
     def organizeDisabilityType(self, disabilityTypes):
         types = []

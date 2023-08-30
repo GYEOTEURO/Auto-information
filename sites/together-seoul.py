@@ -108,10 +108,10 @@ for link in post_links:
         # Extract the image URL if it exists
         try:
             image_element = driver.find_element(By.XPATH, "//a[@class='view_image']")
-            image_url = image_element.get_attribute('href')
+            image_url = [image_element.get_attribute('href')]
         except Exception as e:
             print("image crawling failed")
-            image_url = None
+            image_url = []
 
 
 
