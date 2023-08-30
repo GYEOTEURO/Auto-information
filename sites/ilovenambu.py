@@ -9,8 +9,11 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
+from main import constants
 
-global lastCrawlDate
+# 마지막 크롤링 날짜
+lastCrawlDate = constants['crawl']['latest_date']
+lastCrawlDate = datetime.strptime(lastCrawlDate, '%Y-%m-%d')
 
 fileName = 'ilovenambu'
 siteName = '서울특별시립 남부장애인종합복지관'

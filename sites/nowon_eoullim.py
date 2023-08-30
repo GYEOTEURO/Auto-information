@@ -5,6 +5,10 @@ from selenium.webdriver.common.by import By
 import time
 from datetime import datetime
 import pandas as pd
+from main import constants
+
+# 마지막 크롤링 날짜
+lastCrawlDate = constants['crawl']['latest_date']
 
 class NowonEoullim(Crawl):
     urlDict = {'free': '41', 'notice' : '51', 'eoullimNews': '55', 'houseNeWs': '56'}

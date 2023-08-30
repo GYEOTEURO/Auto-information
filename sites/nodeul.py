@@ -6,6 +6,10 @@ from selenium .webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 import re
+from main import constants
+
+# 마지막 크롤링 날짜
+lastCrawlDate = constants['crawl']['latest_date']
 
 class Nodeul(Crawl):
 
@@ -139,5 +143,5 @@ class Nodeul(Crawl):
 
 
 if __name__ == "__main__":
-    nodeul = Nodeul("http://ncil.or.kr/events_news")
+    nodeul = Nodeul("http://ncil.or.kr/events_news", lastCrawlDate)
     nodeul.startCrawl()

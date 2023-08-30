@@ -7,6 +7,10 @@ from selenium.webdriver.common.by import By
 from selenium .webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import re
+from main import constants
+
+# 마지막 크롤링 날짜
+lastCrawlDate = constants['crawl']['latest_date']
 
 class Hasang(Crawl):
     def __init__(self, url, latestCrawlDate='2023-06-01') -> None:
@@ -128,5 +132,5 @@ class Hasang(Crawl):
 
 
 if __name__ == "__main__":
-    hasang = Hasang("http://www.hasang.org/recruitment_act", "2023-01-01")
+    hasang = Hasang("http://www.hasang.org/recruitment_act", lastCrawlDate)
     hasang.startCrawl()

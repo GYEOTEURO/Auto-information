@@ -6,9 +6,11 @@ import time
 from bs4 import BeautifulSoup
 import datetime
 import re
+from main import constants
 
-
-global lastCrawlDate
+# 마지막 크롤링 날짜
+lastCrawlDate = constants['crawl']['latest_date']
+lastCrawlDate = datetime.strptime(lastCrawlDate, '%Y-%m-%d')
 
 fileName = 'seoulcbid'
 siteName = '서울장애인종합복지관'

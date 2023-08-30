@@ -10,7 +10,7 @@ from datetime import datetime
 with open('constants.yaml', encoding='UTF-8') as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)
 
-def updateLatestDate():
+def updateLastCrawlDate():
   constants['crawl']['latest_date'] = datetime.now().strftime("%Y-%m-%d")
   with open('constants.yaml', 'w', encoding='utf-8') as f:
     yaml.dump(constants, f, allow_unicode=True)
@@ -21,18 +21,16 @@ def runCrawling():
   crawlFiles.remove('save_csv.py')
   print(crawlFiles)
 
-  # for crawlFile in crawlFiles:
-  #   crawlFile = 'sites/' + crawlFile
-  #   print("-------------------")
-  #   print(crawlFile, "실행 시작")
-  #   try:
-  #     subprocess.run(["python", crawlFile])
-  #     print(crawlFile, "실행 완료")
+  for crawlFile in crawlFiles:
+    crawlFile = 'sites/' + crawlFile
+    print("-------------------")
+    print(crawlFile, "실행 시작")
+    try:
+      subprocess.run(["python", crawlFile])
+      print(crawlFile, "실행 완료")
 
-  #   except Exception as e:
-  #     print(e, crawlFile, "실행 실패")
-    
-  # updateLatestDate()
+    except Exception as e:
+      print(e, crawlFile, "실행 실패")
 
 def runSendingSummariesToDB():
   try:
@@ -43,5 +41,6 @@ def runSendingSummariesToDB():
     print(e, ": summaries DB 전송 완료")
 
 if __name__ == "__main__":
-    runCrawling()
+    # runCrawling()
     runSendingSummariesToDB()
+    updateLastCrawlDate()

@@ -11,6 +11,7 @@ import json
 from main import constants
 import asyncio
 import textwrap
+from datetime import datetime
 
 '''
 # session 을 유지하고 싶을 경우
@@ -64,12 +65,17 @@ class Summarizer:
         elif self.gptName == "chatGPT":
             self.gpt = openai.Completion
 
+    def getDataframeAfterLastCrawlDate(self):
+        lastCrawlDate = datetime.strptime(constants['crawl']['latest_date'], "%Y-%m-%d")
+        self.df = self.df.loc[self.df['date'] > lastCrawlDate]
+
     def loadDataframe(self):
         try:
             self.df = pd.read_csv(f"result/crawl/{self.fileName}.csv", parse_dates=['date'])
 
         except Exception as e:
             print(e, ": Load result csv file")
+        self.getDataframeAfterLastCrawlDate()
         
     def saveDataframeToCSV(self):
             try:

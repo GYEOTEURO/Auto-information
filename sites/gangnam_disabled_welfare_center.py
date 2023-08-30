@@ -7,9 +7,11 @@ from selenium.webdriver.common.by import By
 import time
 from datetime import date, timedelta, datetime
 from save_csv import saveCsv
+from main import constants
 
 # 마지막 크롤링 날짜
-global lastCrawlDate
+lastCrawlDate = constants['crawl']['latest_date']
+lastCrawlDate = datetime.strptime(lastCrawlDate, '%Y-%m-%d')
 
 sites = []
 regions = []
