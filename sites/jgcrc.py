@@ -10,6 +10,8 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
+global lastCrawlDate
+
 fileName = 'jgcrc'
 siteName = '서울특별시중구장애인복지관'
 region = ['서울시','중구']
@@ -38,11 +40,6 @@ try:
 except Exception as e:
     print(e, f': Apply format to {fileName}.csv')
 
-            
-now_date = datetime.datetime.now()
-before_one_month = now_date + relativedelta(months=-1)
-
-print(str(before_one_month))
 
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
@@ -52,9 +49,6 @@ driver.get(url)
 # Find all the rows within the tbody element
 rows = driver.find_elements(By.XPATH, '//tbody/tr')
 
-# Get the current date
-current_date = datetime.date.today()
-
 # Collect the post links
 post_links = []
 for row in rows:
@@ -63,12 +57,7 @@ for row in rows:
         date_string = row.find_element(By.CLASS_NAME, 'date').text
         post_date = datetime.datetime.strptime(date_string, '%Y-%m-%d').date()
 
-        # 날짜 차이 계산 (오늘과 포스트 작성일과의 차이)
-        date_diff = (current_date - post_date).days
-
-        # 포스트가 30일 이내에 작성된 것인지 확인
-        if date_diff <= 30:
-            # 30일 이내에 작성된 포스트의 경우 링크를 수집
+        if post_date > lastCrawlDate:
             link_element = row.find_element(By.TAG_NAME, 'a')
             link = link_element.get_attribute('href')
             post_links.append(link)
@@ -88,14 +77,15 @@ for link in post_links:
         except Exception as e:
             print(e, ": title 크롤링 실패")
             title = ""
-        
         try:
-            author_date = driver.find_element(By.CLASS_NAME, 'view_info').text
-            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD 형식의 패턴
-            author_date = re.search(date_pattern, author_date).group()
+            author_date_element = driver.find_element(By.CLASS_NAME, 'view_info').text
+            date_pattern = r"\d{4}\.\d{2}\.\d{2}"  # YYYY.MM.DD format pattern
+            extracted_date = re.search(date_pattern, author_date_element).group()
+            extracted_date_obj = datetime.datetime.strptime(extracted_date, '%Y.%m.%d')
         except Exception as e:
             print(e, "authorDate 크롤링 실패")
-            author_date = current_date
+            extracted_date_obj = None
+
         
         try:
             content = driver.find_element(By.CLASS_NAME, 'view_detail').text
@@ -108,7 +98,7 @@ for link in post_links:
             image_element = driver.find_element(By.CLASS_NAME, 'view_image')
             image_url = image_element.get_attribute('href')
         except Exception as e:
-            print(e, "image 크롤링 실패")
+            print("image 크롤링 실패")
             image_url = None
 
 
@@ -117,7 +107,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(author_date)
+        dates.append(extracted_date_obj)
         contents.append(content)
         images.append(image_url)
 
