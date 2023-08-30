@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from crawl import Crawl
 from main import constants
 from main import constants
