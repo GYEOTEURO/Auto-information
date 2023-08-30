@@ -13,7 +13,7 @@ from main import constants
 
 # 마지막 크롤링 날짜
 lastCrawlDate = constants['crawl']['latest_date']
-lastCrawlDate = datetime.strptime(lastCrawlDate, '%Y-%m-%d')
+lastCrawlDate = datetime.datetime.strptime(lastCrawlDate, '%Y-%m-%d')
 
 fileName = 'jgcrc'
 siteName = '서울특별시중구장애인복지관'

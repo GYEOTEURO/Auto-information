@@ -12,7 +12,7 @@ from main import constants
 
 # 마지막 크롤링 날짜
 lastCrawlDate = constants['crawl']['latest_date']
-lastCrawlDate = datetime.strptime(lastCrawlDate, '%Y-%m-%d')
+lastCrawlDate = datetime.datetime.strptime(lastCrawlDate, '%Y-%m-%d')
 
 fileName = 'seoulcbid'
 siteName = '서울장애인종합복지관'
