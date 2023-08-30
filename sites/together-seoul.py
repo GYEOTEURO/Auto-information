@@ -10,6 +10,8 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
 
+global lastCrawlDate
+
 fileName = 'together-seoul'
 siteName = '서울시장애인복지관협회'
 region = ['서울시']
@@ -37,11 +39,6 @@ try:
 except Exception as e:
     print(e, f': Apply format to {fileName}.csv')
 
-            
-now_date = datetime.datetime.now()
-before_one_month = now_date + relativedelta(months=-1)
-
-print(str(before_one_month))
 
 s = Service('./chromedriver')
 driver = webdriver.Chrome(service=s)
@@ -51,8 +48,6 @@ driver.get(url)
 # Find all the rows within the tbody element
 rows = driver.find_elements(By.TAG_NAME, 'tr')
 
-# Get the current date
-current_date = datetime.date.today()
 
 # Collect the post links
 post_links = []
@@ -64,10 +59,7 @@ for row in rows:
             date_string = columns[3].text
             post_date = datetime.datetime.strptime(date_string, '%y-%m-%d').date()
 
-            # Calculate date difference
-            date_diff = (current_date - post_date).days
-
-            if date_diff <= 30:
+            if post_date > lastCrawlDate:
                 link_element = columns[1].find_element(By.TAG_NAME, 'a')
                 link = link_element.get_attribute('href')
                 post_links.append(link)
@@ -95,10 +87,13 @@ for link in post_links:
             date_string = author_date_element[1].text
             date_pattern = r"\d{2}-\d{2}-\d{2}"  # YY-MM-DD format pattern
             extracted_date = re.search(date_pattern, date_string).group()
+            
+            # YY-MM-DD 형식의 날짜 문자열을 datetime 객체로 변환
+            extracted_date_obj = datetime.datetime.strptime(extracted_date, '%y-%m-%d')
         except Exception as e:
             print(e, "author or date crawling failed")
             author = ""
-            extracted_date = ""
+            extracted_date_obj = None
 
         try:
             content_element = driver.find_element(By.CLASS_NAME, 'detail_data')
@@ -112,7 +107,7 @@ for link in post_links:
             image_element = driver.find_element(By.XPATH, "//a[@class='view_image']")
             image_url = image_element.get_attribute('href')
         except Exception as e:
-            print(e, "image crawling failed")
+            print("image crawling failed")
             image_url = None
 
 
@@ -122,7 +117,7 @@ for link in post_links:
         categories.append(category)
         disabilityTypes.append(disabilityType)
         titles.append(title)
-        dates.append(extracted_date)
+        dates.append(extracted_date_obj)
         contents.append(content)
         images.append(image_url)
 
