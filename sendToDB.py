@@ -37,7 +37,7 @@ def sendImagesToStorage(fileName, imageUrlsGroup):
         storageUrls = []
 
         if imageUrls == [""]:
-            storageUrlsGroup.append(None)
+            storageUrlsGroup.append(storageUrls)
             continue
 
         for imageUrl in imageUrls:

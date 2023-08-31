@@ -41,6 +41,6 @@ def runSendingSummariesToDB():
     print(e, ": summaries DB 전송 완료")
 
 if __name__ == "__main__":
-    # runCrawling()
+    runCrawling()
     runSendingSummariesToDB()
     updateLastCrawlDate()
