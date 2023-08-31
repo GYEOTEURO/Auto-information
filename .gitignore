@@ -4,6 +4,7 @@
 *.jks
 *.json
 *.DS_Store
+*.pem
 
 # GPT Directory
 Bard/
