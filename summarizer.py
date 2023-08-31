@@ -13,19 +13,6 @@ import asyncio
 import textwrap
 from datetime import datetime
 
-'''
-# session 을 유지하고 싶을 경우
-session = requests.Session()
-session.headers = {
-            "Host": "bard.google.com",
-            "X-Same-Domain": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "Origin": "https://bard.google.com",
-            "Referer": "https://bard.google.com/",
-        }
-session.cookies.set("__Secure-1PSID", os.getenv("BARD_COOKIE_KEY"))
-'''
 
 class Summarizer:
     fileName = ''
@@ -245,22 +232,12 @@ class chatGPT(Summarizer):
 
 async def test():
     c = Summarizer("chatGPT")
-    # s, c, d, r = c.getSummaryAndCategoryAndDisabilityTypeAndRegion(content)
-    # print(s, c, d, r)
     c.setFileName("nowon_eoullim")
     await c.summarizeContents()
     c.saveDataframeToCSV()
 
 
 if __name__ == "__main__":
-    content = '''<2023년 장애 인식 교육 안내> 
-학급 내 장애에 대한 이해 증진과 인식의 변화를 도모하고자 강남구 내 유치원· 초·중·고 학생들을 대상으로 장애인식개선 교육을 실시합니다. 많은 관심과 신청 부탁 드립니다.
-1) 신청 기간: ~11/30까지 모집
-2) 교육 일정: 2023년 학기 중
-3) 교육 내용: 일상생활에서 경험하는 점자 & 점자 표기 교육, 과자/음료/젤리에 직접 점자 라벨 부착 체험 
-4) 교육 대상: 영유아, 어린이집, 유치원, 초·중·고 학생
-5) 문의 및 신청: 권익옹호팀 백건현(02-560-4233) / 복지관 이메일 주소  '''
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test())
     loop.close()
