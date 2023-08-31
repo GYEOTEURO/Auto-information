@@ -70,7 +70,7 @@ async def main():
         # summarize 진행 후 df 가져와서 DB로 보내기
     files = getCrawledFileNames()
     print(files)
-    for file in ['seoulcbid.csv']:
+    for file in files:
         fileName = file[:-4]
         try:
             summarizer.setFileName(fileName)
