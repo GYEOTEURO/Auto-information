@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import datetime
 import re
 from main import constants
+from save_csv import saveCsv
 
 # 마지막 크롤링 날짜
 lastCrawlDate = constants['crawl']['latest_date']
@@ -138,27 +139,5 @@ for wr_id, link, post_date in post_links:
 # Quit the driver after processing all post links
 driver.quit()
 
-# Create a DataFrame from the collected data
-import pandas as pd
 
-data = {
-    'site': sites,
-    'region': regions,
-    'category': categories,
-    'disability_type': disabilityTypes,
-    'title': titles,
-    'date': dates,
-    'content': contents,
-    'original_link': originalLinks,
-    'content_link': originalLinks,  # Use originalLinks for now
-    'image': images
-}
-
-df = pd.DataFrame(data)
-
-# Save the DataFrame to a CSV file
-try:
-    df.to_csv(f'result/crawl/{fileName}.csv', index=False)
-    print(f"Data saved to result/crawl/{fileName}.csv")
-except Exception as e:
-    print(e, f": Failed to save data to result/crawl/{fileName}.csv")
+saveCsv(fileName, sites, regions, categories, disabilityTypes, titles, dates, contents, originalLinks, images)

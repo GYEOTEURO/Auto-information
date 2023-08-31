@@ -26,7 +26,7 @@ def runCrawling():
     print("-------------------")
     print(crawlFile, "실행 시작")
     try:
-      subprocess.run(["python", crawlFile])
+      subprocess.run(["python3", crawlFile])
       print(crawlFile, "실행 완료")
 
     except Exception as e:
@@ -34,7 +34,7 @@ def runCrawling():
 
 def runSendingSummariesToDB():
   try:
-    subprocess.run(["python", 'sendToDB.py'])
+    subprocess.run(["python3", 'sendToDB.py'])
     print("summaries DB 전송 완료")
 
   except Exception as e:

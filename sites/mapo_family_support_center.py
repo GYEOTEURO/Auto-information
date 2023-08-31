@@ -56,6 +56,10 @@ while index < 10:
   
         content = driver.find_element(By.CLASS_NAME, 'board_txt_area').find_element(By.CLASS_NAME, 'margin-top-xxl')
 
+        # content 내용 없을 경우애 대한 예외처리
+        if not content:
+            content = ''
+
         imgs = []
 
         try:

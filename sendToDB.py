@@ -70,26 +70,29 @@ async def main():
         # summarize 진행 후 df 가져와서 DB로 보내기
     files = getCrawledFileNames()
     print(files)
-    for file in files:
+    for file in ['seoulcbid.csv']:
         fileName = file[:-4]
-        summarizer.setFileName(fileName)
-        summarizer.loadDataframe()
-        await summarizer.summarizeContents()
+        try:
+            summarizer.setFileName(fileName)
+            summarizer.loadDataframe()
+            await summarizer.summarizeContents()
 
-        summarizer.df.drop(['Unnamed: 0'], axis = 1, inplace = True)
-        summarizer.df = summarizer.df.astype({"category" : "str", "region" : "str", "image" : "str"})
-        summarizer.df["region"] = [summarizer.df.loc[i]['region'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
-        summarizer.df["image"] = [summarizer.df.loc[i]['image'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
-        summarizer.df["image"] = sendImagesToStorage(fileName, summarizer.df["image"].tolist())
-        summarizer.df["post_date"] = datetime.utcnow()
-        print(summarizer.df["image"].tolist())
+            summarizer.df.drop(['Unnamed: 0'], axis = 1, inplace = True)
+            summarizer.df = summarizer.df.astype({"category" : "str", "region" : "str", "image" : "str"})
+            summarizer.df["region"] = [summarizer.df.loc[i]['region'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
+            summarizer.df["image"] = [summarizer.df.loc[i]['image'].replace('\'', '')[1:-1].split(', ') for i in summarizer.df.index]
+            summarizer.df["image"] = sendImagesToStorage(fileName, summarizer.df["image"].tolist())
+            summarizer.df["post_date"] = datetime.utcnow()
+            print(summarizer.df["image"].tolist())
 
-        for i in summarizer.df.index:
-            data = summarizer.df.loc[i].to_dict()
-            print(data)
-            sendDataToDB(data)
+            for i in summarizer.df.index:
+                data = summarizer.df.loc[i].to_dict()
+                print(data)
+                sendDataToDB(data)
 
-        summarizer.saveDataframeToCSV()
+            summarizer.saveDataframeToCSV()
+        except Exception as e:
+            print(e, f"{fileName} 요약 실패")
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())

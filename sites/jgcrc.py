@@ -99,10 +99,10 @@ for link in post_links:
         # Extract the image URL if it exists
         try:
             image_element = driver.find_element(By.CLASS_NAME, 'view_image')
-            image_url = image_element.get_attribute('href')
+            image_url = [image_element.get_attribute('href')]
         except Exception as e:
             print("image 크롤링 실패")
-            image_url = None
+            image_url = []
 
 
         sites.append(siteName)
