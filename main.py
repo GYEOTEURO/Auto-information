@@ -4,7 +4,7 @@ import subprocess
 import yaml
 import os
 from datetime import datetime
-
+import pathlib
 
 # Constants load
 with open('constants.yaml', encoding='UTF-8') as f:
@@ -41,6 +41,7 @@ def runSendingSummariesToDB():
     print(e, ": summaries DB 전송 완료")
 
 if __name__ == "__main__":
-    runCrawling()
-    runSendingSummariesToDB()
-    updateLastCrawlDate()
+  os.chdir(pathlib.Path(__file__).parent.absolute())
+  runCrawling()
+  runSendingSummariesToDB()
+  updateLastCrawlDate()
