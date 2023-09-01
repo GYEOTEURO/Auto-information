@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
