@@ -83,9 +83,15 @@ def find_post_links():
 # Example usage
 post_links = find_post_links()
 
-# Set up the Chrome driver
-s = Service('./chromedriver')
-driver = webdriver.Chrome(service=s)
+options = webdriver.ChromeOptions()
+options.add_argument("--incognito")
+options.add_argument("--headless")
+options.add_argument('--no-sandbox')
+options.add_argument("--disable-setuid-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# 크롬드라이버 실행
+driver = webdriver.Chrome(options=options) 
 
 
 # Iterate over the post links and extract the data for the posts within the last month

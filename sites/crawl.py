@@ -24,9 +24,12 @@ class Crawl:
 
  
     def __init__(self, fileName, url, latestCrawlDate = '2023-06-01') -> None:
-        # Get Latest realse version
-        self.realse = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-        self.version = requests.get(self.realse).text
+        self.options = webdriver.ChromeOptions()
+        self.options.add_argument("--incognito")
+        self.options.add_argument("--headless")
+        self.options.add_argument('--no-sandbox')
+        self.options.add_argument("--disable-setuid-sandbox")
+        self.options.add_argument("--disable-dev-shm-usage")
 
         self.latestCrawlDate = datetime.strptime(latestCrawlDate, '%Y-%m-%d')
 
@@ -35,8 +38,9 @@ class Crawl:
         self.url = url
 
     def openBrowser(self):
-        self.driver= webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver= webdriver.Chrome(options=self.options)
         self.driver.get(self.url)
+        time.sleep(10)
 
     def makeCSVwithFormat(self):
         # Get data format

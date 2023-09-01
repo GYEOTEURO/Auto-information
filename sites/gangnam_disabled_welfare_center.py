@@ -28,9 +28,15 @@ def strToDate(strDate):
     dateTime = datetime.strptime(strDate, '%Y-%m-%d')
     return datetime.date(dateTime)
 
+options = webdriver.ChromeOptions()
+options.add_argument("--incognito")
+options.add_argument("--headless")
+options.add_argument('--no-sandbox')
+options.add_argument("--disable-setuid-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
 # 크롬드라이버 실행
-driver = webdriver.Chrome() 
+driver = webdriver.Chrome(options=options) 
 
 #크롬 드라이버에 url 주소 넣고 실행
 driver.get('https://www.gangnam.go.kr/office/activeart/board/activeart3/list.do?mid=activeart_data03&pgno=2&keyfield=BDM_MAIN_TITLE&keyword=')

@@ -44,8 +44,15 @@ except Exception as e:
     print(e, f': Apply format to {fileName}.csv')
 
 
-s = Service('./chromedriver')
-driver = webdriver.Chrome(service=s)
+options = webdriver.ChromeOptions()
+options.add_argument("--incognito")
+options.add_argument("--headless")
+options.add_argument('--no-sandbox')
+options.add_argument("--disable-setuid-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# 크롬드라이버 실행
+driver = webdriver.Chrome(options=options) 
 
 url = "https://ilovenambu.or.kr/bbs/board.php?bo_table=0102"
 driver.get(url)
