@@ -8,7 +8,7 @@ import pathlib
 
 # Constants load
 with open('constants.yaml', encoding='UTF-8') as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)
+  constants = yaml.load(f, Loader=yaml.FullLoader)
 
 def setWorkingDirectoryToFileDirectory():
   os.chdir(pathlib.Path(__file__).parent.absolute())

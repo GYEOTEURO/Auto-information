@@ -67,7 +67,7 @@ class Summarizer:
     def saveDataframeToCSV(self):
             try:
                 self.df = self.df.astype({"category" : "string"})
-                self.df.to_csv(f'result/summary/{self.fileName}.csv', mode='a')
+                self.df.to_csv(f'result/summary/{self.fileName}.csv', mode='a', header=False)
             except Exception as e:
                 print(e, ": Make summary result csv file")
 

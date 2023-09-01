@@ -2,7 +2,6 @@
 
 from crawl import Crawl
 from main import constants
-from main import constants
 
 # 마지막 크롤링 날짜
 lastCrawlDate = constants['crawl']['latest_date']
