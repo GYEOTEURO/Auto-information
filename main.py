@@ -10,6 +10,9 @@ import pathlib
 with open('constants.yaml', encoding='UTF-8') as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)
 
+def setWorkingDirectoryToFileDirectory():
+  os.chdir(pathlib.Path(__file__).parent.absolute())
+
 def updateLastCrawlDate():
   constants['crawl']['latest_date'] = datetime.now().strftime("%Y-%m-%d")
   with open('constants.yaml', 'w', encoding='utf-8') as f:
@@ -41,7 +44,7 @@ def runSendingSummariesToDB():
     print(e, ": summaries DB 전송 완료")
 
 if __name__ == "__main__":
-  os.chdir(pathlib.Path(__file__).parent.absolute())
+  setWorkingDirectoryToFileDirectory()
   runCrawling()
   runSendingSummariesToDB()
   updateLastCrawlDate()
