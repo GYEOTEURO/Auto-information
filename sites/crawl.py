@@ -30,6 +30,10 @@ class Crawl:
         self.options.add_argument('--no-sandbox')
         self.options.add_argument("--disable-setuid-sandbox")
         self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("enable-automation")
+        self.options.add_argument("--disable-extensions")
+        self.options.add_argument("--dns-prefetch-disable")
+        self.options.add_argument("--disable-gpu")
 
         self.latestCrawlDate = datetime.strptime(latestCrawlDate, '%Y-%m-%d')
 
