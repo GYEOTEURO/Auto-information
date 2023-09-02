@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import aiohttp
 from bardapi import Bard, BardCookies
 from bardapi.constants import SESSION_HEADERS
 import openai
@@ -25,8 +26,8 @@ class Summarizer:
         load_dotenv()
         self.gptName = gptName
         if self.gptName == "Bard":
-            self.token = os.getenv("BARD_COOKIE_KEY")
-        
+            self.token = os.getenv("BARD_COOKIE_KEY") 
+
         elif gptName == "chatGPT":
             openai.organization = os.getenv('OPENAI_ORGANIZAION_ID')
             openai.api_key = os.getenv('OPENAI_API_KEY') 
@@ -149,19 +150,26 @@ class Summarizer:
             return defaultCategory
         
     async def get_openai_response(self, prompt, print_output=False):
-        completions = self.gpt.create(
-            engine=constants['model_parameter']['model'], 
-            temperature=constants['model_parameter']['temperature']['low'],            
-            prompt=prompt,
-            max_tokens=constants['model_parameter']['max_token']['1k']
-        )
-        # Displaying the output can be helpful if things go wrong
-        if print_output:
-            for choice in completions.choices:
-                print(choice.text)
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+            async with session.post(
+                constants['model_parameter']['url'],
+                headers={'Authorization': f'Bearer {openai.api_key}',
+                         "Content-Type": "application/json"},
+                json={
+                    'messages': [
+                        constants['prompt']['system_message'],
+                        {"role": "user", "content": prompt}
+                    ],
+                    'model': constants['model_parameter']['model']['large'],
+                    'temperature': constants['model_parameter']['temperature']['low'],
+                    'max_tokens': constants['model_parameter']['max_token']['1k']
+                }
+            ) as response:
+                response_data = await response.json()
+                if print_output:
+                   print(response_data)
 
-        # Return the first choice's text
-        return completions.choices[0].text
+                return response_data["choices"][0]["message"]["content"]
     
     async def getSummaryAndCategoryAndDisabilityTypeAndRegion(self, content):
         summaryPrompt = content + constants['prompt']['summary'] + constants['prompt']['bard_summary']
@@ -232,12 +240,10 @@ class chatGPT(Summarizer):
 
 async def test():
     c = Summarizer("chatGPT")
-    c.setFileName("nowon_eoullim")
+    c.setFileName("seoul_edu")
     await c.summarizeContents()
     c.saveDataframeToCSV()
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(test())
-    loop.close()
+    asyncio.run(test())

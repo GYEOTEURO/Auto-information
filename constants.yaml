@@ -1,4 +1,5 @@
 prompt :
+  system_message : {"role": "system", "content": "You are an assistant that generates summaries"}
   summary : "\n\n 위 스크립트를 최대한 모든 내용이 반영될 수 있도록 5줄의 분량으로 요약해주고 \"위 스크립트는\" 혹은 \"알겠습니다\"와 같은 서론없이 결과만 출력해줘."
   detect : "\n\n 위 요약본을 바탕으로 글의 주제가 (교육, 보조기기, 지원금, 돌봄 서비스) 중 어디에 가장 적합한 지 알려줘. \n
           그리고 장애 유형은 (발달 장애, 뇌병변 장애) 중 어디에 가장 적합한 지 알려주고 두 장애에 모두 해당하면 \"전체\" 라고 알려줘. \n
@@ -23,7 +24,10 @@ prompt :
               "
 
 model_parameter:
-  model: 'text-davinci-003'
+  url : 'https://api.openai.com/v1/chat/completions'
+  model: 
+    small: 'text-davinci-003'
+    large: 'gpt-3.5-turbo'
   temperature :
     high : 0.7
     low : 0.3
