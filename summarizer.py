@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import aiohttp
-from bardapi import Bard, BardCookies
-from bardapi.constants import SESSION_HEADERS
+# from bardapi import Bard, BardCookies
+# from bardapi.constants import SESSION_HEADERS
 import openai
 import os
 from dotenv import load_dotenv
@@ -43,12 +43,13 @@ class Summarizer:
 
     def makeInstanceOfGPT(self):
         if self.gptName == "Bard":
-            session = requests.Session()
-            session.headers = SESSION_HEADERS
-            session.cookies.set("__Secure-1PSID", self.token)
-            session.cookies.set("__Secure-1PSIDTS", os.getenv("BARD_COOKIE_1PSIDTS"))
-            session.cookies.set("__Secure-1PSIDCC", os.getenv("BARD_COOKIE_1PSIDCC"))
-            self.gpt = Bard(token=self.token, timeout=30, session=session)
+            pass
+            # session = requests.Session()
+            # session.headers = SESSION_HEADERS
+            # session.cookies.set("__Secure-1PSID", self.token)
+            # session.cookies.set("__Secure-1PSIDTS", os.getenv("BARD_COOKIE_1PSIDTS"))
+            # session.cookies.set("__Secure-1PSIDCC", os.getenv("BARD_COOKIE_1PSIDCC"))
+            # self.gpt = Bard(token=self.token, timeout=30, session=session)
 
         elif self.gptName == "chatGPT":
             self.gpt = openai.Completion
