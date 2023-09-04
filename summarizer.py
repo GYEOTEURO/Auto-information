@@ -124,8 +124,8 @@ class Summarizer:
     def organizeRegion(self, region):
         if region == "전국" or region == "전체":
             region = "전체"
-        elif region == "서울" or region == "서울특별시":
-            region = "서울시"
+        elif region == "서울시" or region == "서울특별시":
+            region = "서울"
         return [region]
     
     def organizeDisabilityType(self, disabilityTypes):
