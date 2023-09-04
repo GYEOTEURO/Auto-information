@@ -55,10 +55,10 @@ class Crawl:
 
         # Make result csv file to apply column format
         # 참고 : lastCrawlDate를 지금 입력값으로 가져오는데 나중에 알아서 돌아가게 하려면 이부분의 코드 수정 필요할 듯
-        try:
-            self.df.to_csv(f'result/crawl/{self.fileName}.csv', mode='w')
-        except Exception as e:
-            print(e, f': Apply format to {self.fileName}.csv')
+        # try:
+        #     self.df.to_csv(f'result/crawl/{self.fileName}.csv', mode='w')
+        # except Exception as e:
+        #     print(e, f': Apply format to {self.fileName}.csv')
 
     def getContentsLengthPerPage(self):
         try:
