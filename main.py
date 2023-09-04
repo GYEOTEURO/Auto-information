@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 import pathlib
 
+os.chdir(pathlib.Path(__file__).parent.absolute())
+
 # Constants load
 with open('constants.yaml', encoding='UTF-8') as f:
   constants = yaml.load(f, Loader=yaml.FullLoader)
@@ -20,8 +22,11 @@ def updateLastCrawlDate():
 
 def runCrawling():
   crawlFiles = os.listdir("sites")
+  crawlFiles = os.listdir("sites")
+  crawlFiles = [file for file in crawlFiles if file.endswith('.py')]
   crawlFiles.remove('crawl.py')
   crawlFiles.remove('save_csv.py')
+  crawlFiles.remove('__init__.py')
   print(crawlFiles)
 
   for crawlFile in crawlFiles:
@@ -44,6 +49,9 @@ def runSendingSummariesToDB():
     print(e, ": summaries DB 전송 완료")
 
 if __name__ == "__main__":
+  print("====================================================")
+  print(f"{constants['crawl']['latest_date']} 일자 main.py 실행")
+  print("====================================================\n")
   setWorkingDirectoryToFileDirectory()
   runCrawling()
   runSendingSummariesToDB()

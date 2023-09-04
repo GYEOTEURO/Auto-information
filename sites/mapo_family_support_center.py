@@ -8,7 +8,10 @@ from selenium.webdriver.common.keys import Keys
 import time
 from datetime import date, timedelta, datetime
 from save_csv import saveCsv
-
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
 from main import constants
 
 # 마지막 크롤링 날짜
@@ -36,6 +39,10 @@ options.add_argument("--headless")
 options.add_argument('--no-sandbox')
 options.add_argument("--disable-setuid-sandbox")
 options.add_argument("--disable-dev-shm-usage")
+options.add_argument("enable-automation")
+options.add_argument("--disable-extensions")
+options.add_argument("--dns-prefetch-disable")
+options.add_argument("--disable-gpu")
 
 # 크롬드라이버 실행
 driver = webdriver.Chrome(options=options) 

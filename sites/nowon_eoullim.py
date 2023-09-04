@@ -5,6 +5,10 @@ from selenium.webdriver.common.by import By
 import time
 from datetime import datetime
 import pandas as pd
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
 from main import constants
 
 # 마지막 크롤링 날짜

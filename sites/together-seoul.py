@@ -9,6 +9,10 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import re
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
 from main import constants
 
 # 마지막 크롤링 날짜
@@ -48,6 +52,10 @@ options.add_argument("--headless")
 options.add_argument('--no-sandbox')
 options.add_argument("--disable-setuid-sandbox")
 options.add_argument("--disable-dev-shm-usage")
+options.add_argument("enable-automation")
+options.add_argument("--disable-extensions")
+options.add_argument("--dns-prefetch-disable")
+options.add_argument("--disable-gpu")
 
 # 크롬드라이버 실행
 driver = webdriver.Chrome(options=options) 
@@ -66,7 +74,7 @@ for row in rows:
 
         if len(columns) >= 5:
             date_string = columns[3].text
-            post_date = datetime.datetime.strptime(date_string, '%y-%m-%d').date()
+            post_date = datetime.datetime.strptime(date_string, '%y-%m-%d')
 
             if post_date > lastCrawlDate:
                 link_element = columns[1].find_element(By.TAG_NAME, 'a')
