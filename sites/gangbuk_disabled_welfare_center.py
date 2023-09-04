@@ -31,7 +31,7 @@ images = []
 
 def strToDate(strDate):
     dateTime = datetime.strptime(strDate, '%y-%m-%d')
-    return datetime.date(dateTime)
+    return dateTime
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")

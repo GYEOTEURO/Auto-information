@@ -30,7 +30,7 @@ images = []
 
 def strToDate(strDate):
     dateTime = datetime.strptime(strDate, '%Y-%m-%d')
-    return datetime.date(dateTime)
+    return dateTime
 
 
 options = webdriver.ChromeOptions()
