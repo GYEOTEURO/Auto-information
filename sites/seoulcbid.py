@@ -36,6 +36,16 @@ contents = []
 originalLinks = []
 images = []
 
+options = webdriver.ChromeOptions()
+options.add_argument("--incognito")
+options.add_argument("--headless")
+options.add_argument('--no-sandbox')
+options.add_argument("--disable-setuid-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# 크롬드라이버 실행
+driver = webdriver.Chrome(options=options)
+
 def removeEmailAddress(content):
     emailPattern = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
     content = re.sub(pattern=emailPattern, repl='노들장애인자립생활센터 이메일 주소', string=content)
@@ -43,8 +53,6 @@ def removeEmailAddress(content):
     
 
 def find_post_links():
-    s = Service('./chromedriver')
-    driver = webdriver.Chrome(service=s)
 
     url = "https://seoulcbid.or.kr/bbs/board.php?bo_table=0702"
     driver.get(url)
@@ -85,22 +93,7 @@ def find_post_links():
     return post_links
 
 # Example usage
-post_links = find_post_links()
-
-options = webdriver.ChromeOptions()
-options.add_argument("--incognito")
-options.add_argument("--headless")
-options.add_argument('--no-sandbox')
-options.add_argument("--disable-setuid-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("enable-automation")
-options.add_argument("--disable-extensions")
-options.add_argument("--dns-prefetch-disable")
-options.add_argument("--disable-gpu")
-
-# 크롬드라이버 실행
-driver = webdriver.Chrome(options=options) 
-
+post_links = find_post_links() 
 
 # Iterate over the post links and extract the data for the posts within the last month
 for wr_id, link, post_date in post_links:
