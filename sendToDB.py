@@ -87,6 +87,9 @@ async def main():
 
             for i in summarizer.df.index:
                 data = summarizer.df.loc[i].to_dict()
+                data['scraps'] = 0
+                data['scrapsUser'] = []
+                data['keyword'] = data['title'].split(' ')
                 print(data)
                 sendDataToDB(data)
 
