@@ -50,7 +50,6 @@ def sendImagesToStorage(fileName, imageUrlsGroup):
                 storageUrls.append('https://storage.googleapis.com/'+os.getenv("FIRSTORE_PROJECT_ID")+'.appspot.com/'+url)
             except Exception as e:
                 print(e, ": 이미지 storage 저장 실패")
-                storageUrls.append(None)
 
             
         storageUrlsGroup.append(storageUrls)
