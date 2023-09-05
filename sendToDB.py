@@ -47,7 +47,7 @@ def sendImagesToStorage(fileName, imageUrlsGroup):
                 url = f"autoInformation_images/{fileName}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
                 blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
                 blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
-                storageUrls.append('https://storage.googleapis.com/'+os.getenv("FIRSTORE_PROJECT_ID")+'.appspot.com/'+url)
+                storageUrls.append('gs://'+os.getenv("FIRSTORE_PROJECT_ID")+'.appspot.com/'+url)
             except Exception as e:
                 print(e, ": 이미지 storage 저장 실패")
 
