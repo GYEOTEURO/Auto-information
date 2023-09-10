@@ -1,7 +1,10 @@
 # Auto-information
 
 'Beeside'의 정보 데이터 크롤링을 위한 레포지토리<br/>
-Repository for crawling information data in 'Beeside'<br/><br/>
+Repository for crawling information data in 'Beeside'<br/>
+
+이때 정보 데이터라 함은 중앙부처, 지자체, 재단 등 각종 웹사이트에 분산되어 있는 정보를 한 곳에 모아 사용자에게 제공되는 데이터를 말합니다. 이를 통해 장애인 및 보호자가 웹사이트를 돌아다니며 흩어진 정보를 수집하는 어려움을 줄일 수 있습니다. 더불어 장애 유형이나 지역 등 사용자의 개별적 특성에 따라 정보를 맞춤 제공받을 수 있고, 사용자는 쉽고 간편하게 자신이 받을 수 있는 지원을 확인 및 신청할 수 있습니다.<br/><br/>
+
 
 **The app source code of the information service can be found in the 'Byourside' repository.*
 
