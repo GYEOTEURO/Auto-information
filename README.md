@@ -1,8 +1,8 @@
 # Auto-information
-'Beeside'의 정보 데이터 크롤링을 위한 레포지토리
-Repository for crawling information data in 'Beeside'
+'Beeside'의 정보 데이터 크롤링을 위한 레포지토리<br/>
+Repository for crawling information data in 'Beeside'<br/><br/>
 
-정보 제공 서비스의 앱 소스코드는 'Byourside' 레포지토리에서 확인하실 수 있습니다.
+*정보 제공 서비스의 앱 소스코드는 'Byourside' 레포지토리에서 확인하실 수 있습니다.<br/>
 *The app source code of the information service can be found in the 'Byourside' repository.
   
 <br/><br/>
