@@ -55,7 +55,7 @@ for page in targetPages:
         uploadDate = post.find_element(By.CLASS_NAME, 'col_date').text
         uploadDate = strToDate(uploadDate)
 
-        if uploadDate > strToDate('2023-01-01'):
+        if uploadDate > lastCrawlDate:
             link = post.find_element(By.TAG_NAME, 'a')
             title = link.text
             linkText = link.get_attribute('href')
