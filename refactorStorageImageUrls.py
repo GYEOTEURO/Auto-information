@@ -40,7 +40,6 @@ db = firestore.client()
 bucket = storage.bucket()
 
 
-
 files = os.listdir("result/crawl")
 for file in files:
     df = pd.read_csv(f"result/crawl/{file}", parse_dates=['date'])
@@ -54,8 +53,8 @@ for file in files:
     doc_ref = db.collection('autoInformation').document('교육').collection('autoInformation_posts') # 카테고리 명 계속해서 변경
     docs = doc_ref.where(filter=field_filter).stream()
 
-    index = 0
     for doc in docs:
+        index = 0
         doc_dict = doc.to_dict()
         print(doc_dict)
 
@@ -75,10 +74,12 @@ for file in files:
                     response = requests.get(imageUrl)
                     if response.status_code == 200:
                         imageData = response.content
-                        url = f"autoInformation_images/{file[:-4]}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
+                        url = f"autoInformation_images/{doc.id}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
                         blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
                         blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
-                        storageUrls.append('gs://'+os.getenv("FIRSTORE_PROJECT_ID")+'.appspot.com/'+url)
+                        storageUrl = blob.generate_signed_url()
+                        print(storageUrl)
+                        storageUrls.append(storageUrl)
                     else:
                         continue
                 except Exception as e:
