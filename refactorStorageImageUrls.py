@@ -77,16 +77,14 @@ for file in files:
                         url = f"autoInformation_images/{doc.id}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
                         blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
                         blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
-                        storageUrl = blob.generate_signed_url()
-                        print(storageUrl)
+                        storageUrl = 'gs://' + os.getenv("FIRSTORE_PROJECT_ID") + '.appspot.com/' + url
                         storageUrls.append(storageUrl)
                     else:
                         continue
                 except Exception as e:
                     print(e, ": 이미지 storage 저장 실패")
 
-            doc_dict['image'] = storageUrls
-            doc_ref.document(doc.id).set(doc_dict)
+            doc_ref.document(doc.id).update({"image" : storageUrls})
         
 
 # firebase_admin.delete_app(firebase_admin.get_app())
