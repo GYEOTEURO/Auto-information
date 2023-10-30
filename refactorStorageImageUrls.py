@@ -9,6 +9,8 @@ import requests
 from datetime import datetime
 from google.cloud.firestore_v1.base_query import FieldFilter, BaseCompositeFilter
 
+def sendImageToStorage():
+    pass
 
 Location = {'서울': ['종로구', '중구', '용산구', '성동구', '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구', '노원구', '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구', '금천구', '영등포구', '동작구', '관악구', '서초구', '강남구', '송파구', '강동구'],
     '경기': ['수원시', '고양시', '용인시', '성남시', '부천시', '화성시', '안산시', '남양주시', '안양시', '평택시', '시흥시', '파주시', '의정부시', '김포시', '광주시', '광명시', '군포시', '하남시', '오산시', '양주시', '이천시', '구리시', '안성시', '포천시', '의왕시', '양평군', '여주시', '동두천시', '가평군', '과천시', '연천군'],
@@ -55,11 +57,11 @@ for file in files:
 
     for doc in docs:
         index = 0
+        storageUrls = []
         doc_dict = doc.to_dict()
         print(doc_dict)
 
         if doc_dict:
-            storageUrls = []
             imageUrls = df.loc[df["title"] == doc_dict['title']].iloc[0]['image']
             print(imageUrls)
 
@@ -72,6 +74,7 @@ for file in files:
                 index+=1
                 try:
                     response = requests.get(imageUrl)
+                    response.raise_for_status()
                     if response.status_code == 200:
                         imageData = response.content
                         url = f"autoInformation_images/{doc.id}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
@@ -81,8 +84,12 @@ for file in files:
                         storageUrls.append(storageUrl)
                     else:
                         continue
+                except requests.exceptions.HTTPError as e:
+                    print(f"HTTP 에러 발생: {e}")
+                except requests.exceptions.RequestException as e:
+                    print(f"다운로드 에러 발생: {e}")
                 except Exception as e:
-                    print(e, ": 이미지 storage 저장 실패")
+                    print(f"알 수 없는 에러 발생: {e}")
 
             doc_ref.document(doc.id).update({"image" : storageUrls})
         
