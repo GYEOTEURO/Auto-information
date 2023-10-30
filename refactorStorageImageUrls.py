@@ -75,15 +75,14 @@ for file in files:
                 try:
                     response = requests.get(imageUrl)
                     response.raise_for_status()
-                    if response.status_code == 200:
-                        imageData = response.content
-                        url = f"autoInformation_images/{doc.id}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
-                        blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
-                        blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
-                        storageUrl = 'gs://' + os.getenv("FIRSTORE_PROJECT_ID") + '.appspot.com/' + url
-                        storageUrls.append(storageUrl)
-                    else:
-                        continue
+                    
+                    imageData = response.content
+                    url = f"autoInformation_images/{doc.id}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
+                    blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
+                    blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
+                    storageUrl = 'gs://' + os.getenv("FIRSTORE_PROJECT_ID") + '.appspot.com/' + url
+                    storageUrls.append(storageUrl)
+                    
                 except requests.exceptions.HTTPError as e:
                     print(f"HTTP 에러 발생: {e}")
                 except requests.exceptions.RequestException as e:
