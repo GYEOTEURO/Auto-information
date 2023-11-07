@@ -43,14 +43,21 @@ def sendImagesToStorage(fileName, imageUrlsGroup):
         for imageUrl in imageUrls:
             try:
                 response = requests.get(imageUrl)
-                if response.status_code == 200:
-                    imageData = response.content
-                    url = f"autoInformation_images/{fileName}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
-                    blob = bucket.blob(url)  # 업로드할 경로 및 파일명 지정
-                    blob.upload_from_string(imageData, content_type="image/jpeg")  # 이미지 데이터 및 MIME 타입 지정
-                    storageUrls.append('gs://'+os.getenv("FIRSTORE_PROJECT_ID")+'.appspot.com/'+url)
+                response.raise_for_status()
+
+                imageData = response.content
+                url = f"autoInformation_images/{fileName}_{index}" + datetime.now().strftime("_%Y-%m-%d_%H-%M") + ".jpg"
+                blob = bucket.blob(url)
+                blob.upload_from_string(imageData, content_type="image/jpeg")
+                storageUrl = 'gs://' + os.getenv("FIRSTORE_PROJECT_ID") + '.appspot.com/' + url
+                storageUrls.append(storageUrl)
+                    
+            except requests.exceptions.HTTPError as e:
+                print(f"HTTP 에러 발생: {e}")
+            except requests.exceptions.RequestException as e:
+                print(f"다운로드 에러 발생: {e}")
             except Exception as e:
-                print(e, ": 이미지 storage 저장 실패")
+                print(f"알 수 없는 에러 발생: {e}")
 
             
         storageUrlsGroup.append(storageUrls)
